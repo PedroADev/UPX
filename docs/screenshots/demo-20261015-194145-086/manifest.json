@@ -1,0 +1,168 @@
+{
+    "startedAtUtc": "2026-10-15T19:41:45.0864502Z",
+    "completedAtUtc": "2026-10-15T19:42:06.6501745Z",
+    "unityVersion": "6000.0.83f1",
+    "status": "completed",
+    "failure": "",
+    "outputDirectory": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086",
+    "captureMethod": "Unity ScreenCapture.CaptureScreenshot; actual Game View, including runtime UI",
+    "sessionMode": "practice; no fabricated classmates",
+    "qaProfile": "Lia / dog",
+    "progressRestored": true,
+    "gameViewSelectionRestored": true,
+    "targetWidth": 1280,
+    "targetHeight": 800,
+    "originalGameViewSizeIndex": 0,
+    "firstAnswerCorrect": true,
+    "firstAnswerExplanation": "2 + 3 = 5. Você fica com 5 maçãs!",
+    "answeredQuestions": 1,
+    "errors": 0,
+    "warnings": 0,
+    "movementStart": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -3.5
+    },
+    "movementEnd": {
+        "x": 3.688913106918335,
+        "y": 0.0,
+        "z": -3.5
+    },
+    "movementDistance": 3.688913106918335,
+    "screenshots": [
+        {
+            "name": "01-entrada-e-personagens",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\01-entrada-e-personagens.png",
+            "room": "hub",
+            "capturedAtUtc": "2026-10-15T19:41:55.1304297Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 124,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        },
+        {
+            "name": "02-personagem-caminhando",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\02-personagem-caminhando.png",
+            "room": "hub",
+            "capturedAtUtc": "2026-10-15T19:41:58.1990823Z",
+            "position": {
+                "x": 3.688913106918335,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "frame": 291,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        },
+        {
+            "name": "03-praca-verde-e-interface",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\03-praca-verde-e-interface.png",
+            "room": "hub",
+            "capturedAtUtc": "2026-10-15T19:41:59.6031940Z",
+            "position": {
+                "x": 6.155128002166748,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 374,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        },
+        {
+            "name": "04-ilha-de-matematica",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\04-ilha-de-matematica.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:42:01.4139506Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 481,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        },
+        {
+            "name": "05-lista-de-desafios",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\05-lista-de-desafios.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:42:02.8189984Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 564,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        },
+        {
+            "name": "06-quiz-de-matematica",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\06-quiz-de-matematica.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:42:04.4334819Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 660,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        },
+        {
+            "name": "07-resposta-e-explicacao",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-194145-086\\07-resposta-e-explicacao.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:42:06.0483063Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 756,
+            "width": 1280,
+            "height": 800,
+            "pngVerified": true
+        }
+    ],
+    "logs": []
+}

@@ -1,0 +1,12 @@
+{
+  "name": "aprender-juntos-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Servidor de sessões e quizzes do jogo Aprender Juntos",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  }
+}

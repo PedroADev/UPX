@@ -1,0 +1,17 @@
+Toon Environments World Creator Pack Lite
+https://assetstore.unity.com/packages/3d/environments/landscapes/toon-environments-world-creator-pack-lite-264325
+Original source prefabs used by GreenPlaza.prefab:
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Prefabs/Props/Flower.prefab
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Prefabs/Props/Grass.prefab
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Prefabs/Props/Rock4.prefab
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Prefabs/Props/Shrub.prefab
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Prefabs/Props/Tree.prefab
+
+Original mesh, material and texture dependencies (kept unchanged):
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Materials/Spring.mat
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Models/Props/Flower.fbx
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Models/Props/Grass.fbx
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Models/Props/Rock4.fbx
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Models/Props/Shrub.fbx
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Models/Props/Tree.fbx
+Assets/Selcuk Gerceker/Toon Environments - World Creator Pack Lite/Textures/Spring.png

@@ -36,6 +36,7 @@ namespace Unity.Template.Multiplayer.NGO.Editor
         /// <param name="report">The generated build report.</param>
         public void OnPreprocessBuild(BuildReport report)
         {
+            if (IsLearningGameBuild()) return;
             AssetDatabase.SaveAssets();
             ApplyPreBuildChanges();
 
@@ -61,6 +62,7 @@ namespace Unity.Template.Multiplayer.NGO.Editor
         /// <param name="report">The generated build report.</param>
         public void OnPostprocessBuild(BuildReport report)
         {
+            if (IsLearningGameBuild()) return;
             RevertPreBuildChanges();
             string definesString = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
             List<string> allDefines = definesString.Split(';').ToList();
@@ -82,6 +84,10 @@ namespace Unity.Template.Multiplayer.NGO.Editor
             CloudBuildHelpers.PostExport(report.summary.outputPath, isServerBuild);
 #endif
         }
+
+        // The learning game has its own scene and build pipeline. Do not run the
+        // original sample's cloud export or prefab rewriting for these builds.
+        static bool IsLearningGameBuild() => EditorBuildSettings.scenes.Any(scene => scene.enabled && scene.path.StartsWith("Assets/Aprender/", StringComparison.Ordinal));
 
         void ApplyPreBuildChanges()
         {
