@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "subjects": [
+    {
+      "id": "matematica",
+      "title": "Matemática",
+      "subtitle": "Uma aventura com números e formas",
+      "color": "#8866D6",
+      "icon": "+",
+      "quizzes": [
+        {
+          "id": "mat-somas",
+          "title": "Contar é uma aventura",
+          "description": "Vamos contar, juntar e descobrir!",
+          "questions": [
+            {"id":"mat-somas-1","text":"Você tem 2 maçãs e ganha mais 3. Com quantas maçãs fica?","options":[{"id":"a","text":"4 maçãs"},{"id":"b","text":"5 maçãs"},{"id":"c","text":"6 maçãs"}],"correctOptionId":"b","explanation":"2 + 3 = 5. Você fica com 5 maçãs!"},
+            {"id":"mat-somas-2","text":"Há 7 passarinhos na árvore. 2 voam para longe. Quantos ficam?","options":[{"id":"a","text":"5 passarinhos"},{"id":"b","text":"6 passarinhos"},{"id":"c","text":"9 passarinhos"}],"correctOptionId":"a","explanation":"7 - 2 = 5. Cinco passarinhos ficam na árvore."},
+            {"id":"mat-somas-3","text":"Qual número vem logo depois do 9?","options":[{"id":"a","text":"8"},{"id":"b","text":"11"},{"id":"c","text":"10"}],"correctOptionId":"c","explanation":"Na sequência 8, 9, 10, o número depois do 9 é 10."},
+            {"id":"mat-somas-4","text":"Qual grupo tem mais brinquedos?","options":[{"id":"a","text":"Um grupo com 4"},{"id":"b","text":"Um grupo com 8"},{"id":"c","text":"Um grupo com 6"}],"correctOptionId":"b","explanation":"8 é maior que 4 e que 6. O grupo com 8 tem mais brinquedos."}
+          ]
+        },
+        {
+          "id": "mat-formas",
+          "title": "Detetives das formas",
+          "description": "Descubra as formas e complete as sequências.",
+          "questions": [
+            {"id":"mat-formas-1","text":"Qual forma tem 3 lados?","options":[{"id":"a","text":"Triângulo"},{"id":"b","text":"Quadrado"},{"id":"c","text":"Círculo"}],"correctOptionId":"a","explanation":"O triângulo tem 3 lados e 3 pontinhas."},
+            {"id":"mat-formas-2","text":"Uma roda de bicicleta lembra qual forma?","options":[{"id":"a","text":"Retângulo"},{"id":"b","text":"Triângulo"},{"id":"c","text":"Círculo"}],"correctOptionId":"c","explanation":"A roda é redonda, como um círculo."},
+            {"id":"mat-formas-3","text":"Complete a sequência: 2, 4, 6, ...","options":[{"id":"a","text":"7"},{"id":"b","text":"8"},{"id":"c","text":"10"}],"correctOptionId":"b","explanation":"Estamos contando de 2 em 2: 2, 4, 6, 8!"},
+            {"id":"mat-formas-4","text":"Quantos lados tem um quadrado?","options":[{"id":"a","text":"3 lados"},{"id":"b","text":"5 lados"},{"id":"c","text":"4 lados"}],"correctOptionId":"c","explanation":"O quadrado tem 4 lados do mesmo tamanho."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "portugues",
+      "title": "Português",
+      "subtitle": "Histórias, letras e descobertas",
+      "color": "#E68C4F",
+      "icon": "Aa",
+      "quizzes": [
+        {
+          "id": "por-palavras",
+          "title": "Brincando com palavras",
+          "description": "Encontre letras, sílabas e rimas.",
+          "questions": [
+            {"id":"por-palavras-1","text":"Qual palavra começa com a letra B?","options":[{"id":"a","text":"Casa"},{"id":"b","text":"Bola"},{"id":"c","text":"Pato"}],"correctOptionId":"b","explanation":"Bola começa com B: B-O-L-A."},
+            {"id":"por-palavras-2","text":"Qual palavra rima com GATO?","options":[{"id":"a","text":"Pato"},{"id":"b","text":"Mesa"},{"id":"c","text":"Bola"}],"correctOptionId":"a","explanation":"Gato e pato terminam com o mesmo som: ATO!"},
+            {"id":"por-palavras-3","text":"Quantas sílabas tem a palavra CA-SA?","options":[{"id":"a","text":"1 sílaba"},{"id":"b","text":"3 sílabas"},{"id":"c","text":"2 sílabas"}],"correctOptionId":"c","explanation":"CA-SA tem duas partes faladas: CA e SA."},
+            {"id":"por-palavras-4","text":"Qual destas letras é uma vogal?","options":[{"id":"a","text":"P"},{"id":"b","text":"E"},{"id":"c","text":"T"}],"correctOptionId":"b","explanation":"As vogais são A, E, I, O e U. E é uma vogal!"}
+          ]
+        },
+        {
+          "id": "por-leitura",
+          "title": "Pequenos leitores",
+          "description": "Leia pistas e descubra as respostas.",
+          "questions": [
+            {"id":"por-leitura-1","text":"Lia levou um guarda-chuva porque estava chovendo. O que Lia levou?","options":[{"id":"a","text":"Um guarda-chuva"},{"id":"b","text":"Uma pipa"},{"id":"c","text":"Uma bola"}],"correctOptionId":"a","explanation":"O texto conta que Lia levou um guarda-chuva para se proteger da chuva."},
+            {"id":"por-leitura-2","text":"O cachorro de Davi se chama Pipoca. Qual é o nome do cachorro?","options":[{"id":"a","text":"Davi"},{"id":"b","text":"Paçoca"},{"id":"c","text":"Pipoca"}],"correctOptionId":"c","explanation":"Pipoca é o nome do cachorro de Davi."},
+            {"id":"por-leitura-3","text":"Qual sinal usamos no final de uma pergunta?","options":[{"id":"a","text":"Ponto final: ."},{"id":"b","text":"Ponto de interrogação: ?"},{"id":"c","text":"Vírgula: ,"}],"correctOptionId":"b","explanation":"O ponto de interrogação (?) mostra que a frase faz uma pergunta."},
+            {"id":"por-leitura-4","text":"Ana plantou uma semente e regou todos os dias. Depois nasceu uma plantinha. O que Ana plantou?","options":[{"id":"a","text":"Uma pedra"},{"id":"b","text":"Um brinquedo"},{"id":"c","text":"Uma semente"}],"correctOptionId":"c","explanation":"Ana plantou uma semente. Com água e cuidados, ela virou uma plantinha."}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ciencias",
+      "title": "Ciências",
+      "subtitle": "Explore a natureza e cuide de você",
+      "color": "#42A382",
+      "icon": "Ci",
+      "quizzes": [
+        {
+          "id": "cie-natureza",
+          "title": "Amigos da natureza",
+          "description": "Uma missão para cuidar do nosso planeta.",
+          "questions": [
+            {"id":"cie-natureza-1","text":"O que uma planta precisa para crescer?","options":[{"id":"a","text":"Somente brinquedos"},{"id":"b","text":"Água e luz do Sol"},{"id":"c","text":"Somente pedras"}],"correctOptionId":"b","explanation":"As plantas precisam de água e luz, além de ar e nutrientes, para crescer."},
+            {"id":"cie-natureza-2","text":"Qual destes animais vive na água?","options":[{"id":"a","text":"Peixe"},{"id":"b","text":"Gato"},{"id":"c","text":"Galinha"}],"correctOptionId":"a","explanation":"Os peixes vivem na água e respiram por brânquias."},
+            {"id":"cie-natureza-3","text":"O que devemos fazer com o lixo depois de um piquenique?","options":[{"id":"a","text":"Deixar na grama"},{"id":"b","text":"Jogar no rio"},{"id":"c","text":"Recolher e colocar na lixeira"}],"correctOptionId":"c","explanation":"Recolher o lixo ajuda a proteger os animais, as plantas e a água."},
+            {"id":"cie-natureza-4","text":"Qual atitude ajuda a economizar água?","options":[{"id":"a","text":"Deixar a torneira aberta"},{"id":"b","text":"Fechar a torneira ao escovar os dentes"},{"id":"c","text":"Brincar com a mangueira ligada"}],"correctOptionId":"b","explanation":"Fechar a torneira enquanto escovamos os dentes evita desperdício de água."}
+          ]
+        },
+        {
+          "id": "cie-corpo",
+          "title": "Meu corpo, meu cuidado",
+          "description": "Conheça seus sentidos e hábitos de cuidado.",
+          "questions": [
+            {"id":"cie-corpo-1","text":"Qual parte do corpo usamos para ouvir?","options":[{"id":"a","text":"Orelhas"},{"id":"b","text":"Olhos"},{"id":"c","text":"Mãos"}],"correctOptionId":"a","explanation":"Ouvimos os sons com os ouvidos, que ficam na região das orelhas."},
+            {"id":"cie-corpo-2","text":"O que devemos fazer antes de comer?","options":[{"id":"a","text":"Sujar as mãos"},{"id":"b","text":"Guardar os sapatos"},{"id":"c","text":"Lavar as mãos"}],"correctOptionId":"c","explanation":"Lavar as mãos com água e sabão ajuda a tirar a sujeira e os microrganismos."},
+            {"id":"cie-corpo-3","text":"Qual sentido usamos para sentir o cheiro de uma flor?","options":[{"id":"a","text":"Visão"},{"id":"b","text":"Olfato"},{"id":"c","text":"Audição"}],"correctOptionId":"b","explanation":"O olfato nos permite perceber cheiros pelo nariz."},
+            {"id":"cie-corpo-4","text":"Qual hábito ajuda o corpo a descansar e crescer?","options":[{"id":"a","text":"Dormir bem"},{"id":"b","text":"Ficar acordado a noite toda"},{"id":"c","text":"Nunca brincar"}],"correctOptionId":"a","explanation":"Dormir bem ajuda o corpo a descansar, crescer e aprender."}
+          ]
+        }
+      ]
+    }
+  ]
+}

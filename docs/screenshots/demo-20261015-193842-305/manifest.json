@@ -1,0 +1,142 @@
+{
+    "startedAtUtc": "2026-10-15T19:38:42.3072451Z",
+    "completedAtUtc": "2026-10-15T19:38:56.1067237Z",
+    "unityVersion": "6000.0.83f1",
+    "status": "completed",
+    "failure": "",
+    "outputDirectory": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305",
+    "captureMethod": "Unity ScreenCapture.CaptureScreenshot; actual Game View, including runtime UI",
+    "sessionMode": "practice; no fabricated classmates",
+    "qaProfile": "Lia / dog",
+    "progressRestored": true,
+    "errors": 0,
+    "warnings": 0,
+    "movementStart": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -3.5
+    },
+    "movementEnd": {
+        "x": 3.6898841857910158,
+        "y": 0.0,
+        "z": -3.5
+    },
+    "movementDistance": 3.6898841857910158,
+    "screenshots": [
+        {
+            "name": "01-entrada-e-personagens",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305\\01-entrada-e-personagens.png",
+            "room": "hub",
+            "capturedAtUtc": "2026-10-15T19:38:45.9160839Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 133,
+            "width": 1206,
+            "height": 614,
+            "pngVerified": true
+        },
+        {
+            "name": "02-personagem-caminhando",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305\\02-personagem-caminhando.png",
+            "room": "hub",
+            "capturedAtUtc": "2026-10-15T19:38:49.2712366Z",
+            "position": {
+                "x": 3.6898841857910158,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 1.0,
+                "y": 0.0
+            },
+            "frame": 311,
+            "width": 1206,
+            "height": 614,
+            "pngVerified": true
+        },
+        {
+            "name": "03-praca-verde-e-interface",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305\\03-praca-verde-e-interface.png",
+            "room": "hub",
+            "capturedAtUtc": "2026-10-15T19:38:50.6740834Z",
+            "position": {
+                "x": 6.193437576293945,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 395,
+            "width": 1206,
+            "height": 614,
+            "pngVerified": true
+        },
+        {
+            "name": "04-ilha-de-matematica",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305\\04-ilha-de-matematica.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:38:52.4835506Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 502,
+            "width": 1206,
+            "height": 614,
+            "pngVerified": true
+        },
+        {
+            "name": "05-lista-de-desafios",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305\\05-lista-de-desafios.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:38:53.8902641Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 586,
+            "width": 1206,
+            "height": 614,
+            "pngVerified": true
+        },
+        {
+            "name": "06-quiz-de-matematica",
+            "path": "C:\\Users\\pedro\\Documents\\GitHub\\UPX\\docs\\screenshots\\demo-20261015-193842-305\\06-quiz-de-matematica.png",
+            "room": "matematica",
+            "capturedAtUtc": "2026-10-15T19:38:55.5046431Z",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.5
+            },
+            "movementInput": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "frame": 682,
+            "width": 1206,
+            "height": 614,
+            "pngVerified": true
+        }
+    ],
+    "logs": []
+}
