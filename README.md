@@ -8,7 +8,7 @@ Jogo educativo 3D em português para crianças de aproximadamente 7 anos, em **U
 2. Use **Ilha do Saber > Abrir jogo**. A preparação configura o renderizador 3D, a interface e os seis personagens Kenney automaticamente. A cena é `Assets/Aprender/Scenes/IlhaDoSaber.unity`.
 3. Pressione **Play**, escolha um nome e um personagem e toque em **Quero praticar sozinho**. Esse modo funciona inteiramente sem servidor.
 
-O projeto já aponta a nova cena como cena de build. Depois da preparação, Play inicia essa cena mesmo que outra esteja aberta. Para refazer a configuração, use **Ilha do Saber > Preparar projeto**. Os arquivos do template original foram preservados; seu processador de builds é ignorado nos builds do jogo educativo. A referência obrigatória ao ParrelSync foi removida porque esse pacote opcional não está instalado.
+O projeto já aponta a cena do jogo como cena de build. Depois da preparação, Play inicia essa cena mesmo que outra esteja aberta. Para refazer a configuração, use **Ilha do Saber > Preparar projeto**. O código, as cenas, os prefabs, os tutoriais e os pacotes exclusivos do template multiplayer original foram removidos. O tema da interface foi mantido em `Assets/Aprender/Resources/UnityDefaultRuntimeTheme.tss`; as configurações ativas de renderização e entrada também foram preservadas.
 
 ## Jogar com a turma
 
