@@ -173,7 +173,7 @@ namespace Aprender
         {
             if (controllerHint == null || controllerHint.parent == null)
             {
-                controllerHint = Text(root, "", "controller-hint");
+                controllerHint = Text(screen ?? root, "", "controller-hint");
                 controllerHint.pickingMode = PickingMode.Ignore;
             }
             controllerHint.style.display = GameControls.Connected ? DisplayStyle.Flex : DisplayStyle.None;
@@ -294,8 +294,9 @@ namespace Aprender
             keyboardValue = keyboardOriginal;
             keyboardUpper = field == codeField;
             letterKeys.Clear();
-            keyboardOverlay = Box(root, "controller-keyboard-overlay");
+            keyboardOverlay = Box(screen ?? root, "controller-keyboard-overlay");
             var scroll = new ScrollView(ScrollViewMode.Vertical);
+            ConfigureMobileScrollView(scroll);
             keyboardOverlay.Add(scroll);
             var panel = Box(scroll.contentContainer, "controller-keyboard card");
             var isName = field == nameField;

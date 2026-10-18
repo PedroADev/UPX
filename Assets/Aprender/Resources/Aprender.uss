@@ -233,3 +233,73 @@ Button:focus { border-width: 2px; border-color: #b18227; }
 .controller-keyboard-error { min-height: 18px; }
 .screen.game-screen { background-color: transparent; }
 .pet-choice.controller-focus, .answer-choice.controller-focus { border-color: #d5a23d; background-color: #faf2d7; }
+
+/* iPhone: unidades de interface próximas a pontos, dentro da área segura. */
+.mobile .safe-area { flex-direction: column; }
+.mobile .screen { flex-grow: 1; }
+.mobile Button { min-height: 52px; font-size: 16px; }
+.mobile .hero, .mobile .header-subjects { display: none; }
+.mobile .login-header { padding: 10px 16px; min-height: 48px; }
+.mobile .brand-icon { width: 29px; height: 29px; font-size: 13px; }
+.mobile .brand-name { font-size: 20px; }
+.mobile .login-columns { padding: 4px 16px 12px; }
+.mobile .login-card { width: 100%; max-width: 620px; padding: 12px 18px; }
+.mobile .login-card > .title, .mobile .login-card > .hint { display: none; }
+.mobile .title { font-size: 26px; }
+.mobile .field-title { margin-top: 8px; margin-bottom: 5px; font-size: 16px; }
+.mobile .text-input { height: 52px; font-size: 19px; }
+.mobile .server-input { font-size: 16px; }
+.mobile .pet-choice { min-height: 72px; padding: 3px 1px; }
+.mobile .pet-thumb { width: 51px; height: 49px; }
+.mobile .pet-name { font-size: 11px; }
+.mobile .practice-button { margin-top: 10px; }
+.mobile .classroom { margin-top: 10px; padding-top: 6px; }
+.mobile .classroom > .unity-foldout__toggle, .mobile .teacher > .unity-foldout__toggle { min-height: 48px; }
+.mobile .hud-top { padding: 3px 10px; min-height: 52px; }
+.mobile .hud-top .brand, .mobile .hud-top .vertical-divider { display: none; }
+.mobile .location-title { font-size: 16px; }
+.mobile .hud-top Button { min-height: 44px; padding: 6px 9px; font-size: 13px; }
+.mobile .session-pill { display: none; }
+.mobile.online-session .session-pill { display: flex; padding: 6px; font-size: 10px; margin-right: 3px; }
+.mobile .stars-pill { padding: 6px; font-size: 14px; margin-right: 3px; }
+.mobile .world-guide { display: none; }
+.mobile .friends-card { display: none; }
+.mobile .hud-bottom { left: 168px; right: 14px; bottom: 18px; height: 56px; }
+.mobile .hud-bottom Button { min-height: 52px; padding: 8px 12px; font-size: 14px; }
+.mobile .key-hint { display: none; }
+.mobile .interaction { min-width: 145px; }
+.mobile .interaction .body { font-size: 14px; }
+.mobile .touch-stick { position: absolute; left: 18px; bottom: 18px; width: 126px; height: 126px; border-radius: 63px; background-color: rgba(249, 249, 239, 0.78); border-width: 2px; border-color: #647d58; }
+.mobile .touch-stick__knob { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; border-radius: 27px; background-color: #315e49; border-width: 2px; border-color: #f1f3df; }
+.mobile .touch-stick.pressed { background-color: rgba(249, 249, 239, 0.94); border-color: #315e49; }
+.mobile .touch-stick:disabled { opacity: 0.3; }
+.mobile .modal-scroll .unity-scroll-view__content-container { padding: 12px; }
+.mobile .modal { width: 680px; max-width: 100%; padding: 12px 18px; }
+.mobile .question-text { font-size: 22px; margin-top: 8px; margin-bottom: 8px; }
+.mobile .question-panel > .muted.body { display: none; }
+.mobile .progress-row { margin-top: 8px; margin-bottom: 10px; }
+.mobile .options { margin-top: 8px; }
+.mobile .answer-choice { width: 32%; min-height: 64px; padding: 8px; margin-bottom: 8px; }
+.mobile .answer-letter { width: 27px; height: 27px; margin-right: 8px; }
+.mobile .answer-text { font-size: 17px; }
+.mobile .question-actions { margin-top: 8px; }
+.mobile .question-actions .hint { display: none; }
+.mobile .feedback .body { font-size: 16px; }
+.mobile .results-panel { width: 570px; }
+.mobile .result-stars { margin: 10px 0; font-size: 48px; }
+.mobile .result-recap { margin: 14px 0; padding: 12px; }
+.mobile .quiz-choice { padding: 12px; margin-top: 12px; }
+.mobile .quiz-info { padding-right: 12px; }
+.mobile .controller-hint { font-size: 10px; }
+.mobile .controller-keyboard { width: 700px; max-width: 96%; padding: 14px; }
+.mobile .controller-key { min-width: 40px; min-height: 46px; padding: 5px; }
+.mobile .controller-keyboard-overlay > ScrollView { width: 100%; max-height: 100%; }
+.mobile .controller-keyboard-overlay .unity-scroll-view__content-container { align-items: center; padding: 10px; }
+.mobile.keyboard-open .login-header { display: none; }
+.mobile.keyboard-open .login-columns { padding-top: 8px; }
+.mobile.short-screen .login-card { padding: 10px 18px; }
+.mobile.short-screen .modal { padding: 12px 18px; }
+.mobile .hud-top Button { min-height: 50px; }
+.mobile .friends-card { display: flex; top: 64px; right: 12px; width: 175px; padding: 4px 9px; max-height: 210px; }
+.mobile .friends-card .unity-foldout__toggle { min-height: 40px; }
+.mobile .friend-scroll { max-height: 130px; }

@@ -53,6 +53,7 @@ namespace Aprender
                 Debug.LogError("Painel não encontrado. Use Ilha do Saber > Preparar projeto no Editor.");
                 return;
             }
+            InitializeMobileUI();
             root = document.rootVisualElement;
             root.AddToClassList("app");
             var css = Resources.Load<StyleSheet>("Aprender");
@@ -71,6 +72,7 @@ namespace Aprender
         void Update()
         {
             UpdateControllerUI();
+            UpdateMobileUI();
             if (session == null || world == null || !session.IsJoined) return;
             presenceClock += Time.unscaledDeltaTime;
             if (presenceClock > 0.2f)
@@ -93,8 +95,10 @@ namespace Aprender
         void ResetUI()
         {
             ControllerUIReset();
+            ResetMobileUI();
             root.Clear();
             screen = Box(root, "screen");
+            ConfigureMobileScreen();
             overlay = null;
             friends = null;
             status = null;
@@ -111,6 +115,7 @@ namespace Aprender
             Brand(header);
             Text(header, "Matemática · Português · Ciências", "header-subjects");
             var scroll = new ScrollView(ScrollViewMode.Vertical);
+            ConfigureMobileScrollView(scroll);
             scroll.AddToClassList("login-scroll");
             screen.Add(scroll);
             var columns = Box(scroll.contentContainer, "login-columns row");
@@ -126,6 +131,7 @@ namespace Aprender
             Text(card, "Vamos jogar", "title");
             Text(card, "Seu nome", "field-title");
             nameField = new TextField { value = enteredName, maxLength = 20, name = "player-name" };
+            ConfigureMobileTextField(nameField, TouchScreenKeyboardType.Default);
             nameField.AddToClassList("text-input");
             nameField.tooltip = "Use um nome ou apelido com 2 a 20 caracteres.";
             nameField.RegisterValueChangedCallback(e => enteredName = e.newValue);
@@ -156,6 +162,7 @@ namespace Aprender
             Text(classroom.contentContainer, "Código da turma", "field-title");
             var codeRow = Box(classroom.contentContainer, "row code-row");
             codeField = new TextField { value = enteredCode, maxLength = 8, name = "classroom-code" };
+            ConfigureMobileTextField(codeField, TouchScreenKeyboardType.ASCIICapable);
             codeField.AddToClassList("text-input");
             codeField.AddToClassList("code-input");
             codeField.RegisterValueChangedCallback(e => enteredCode = e.newValue.ToUpperInvariant());
@@ -167,13 +174,14 @@ namespace Aprender
             classroom.Add(teacher);
             Text(teacher.contentContainer, "Endereço do servidor", "field-title");
             serverField = new TextField { value = enteredServer, maxLength = 200, name = "classroom-server" };
+            ConfigureMobileTextField(serverField, TouchScreenKeyboardType.URL);
             serverField.AddToClassList("text-input");
             serverField.AddToClassList("server-input");
             serverField.RegisterValueChangedCallback(e => enteredServer = e.newValue);
             teacher.Add(serverField);
             Btn(teacher.contentContainer, "Criar turma", () => Join(true), "secondary");
             Text(teacher.contentContainer, "Use o mesmo servidor nos aparelhos da turma.", "hint wrap");
-            if (!Application.isMobilePlatform && !GameControls.Connected) nameField.Focus();
+            if (!IsMobileUI && !GameControls.Connected) nameField.Focus();
         }
 
         bool ValidateName()
@@ -210,6 +218,7 @@ namespace Aprender
                 codeField.Focus();
                 return;
             }
+            if (!ValidateMobileServerAddress()) return;
             busy = true;
             status.text = create ? "Abrindo sua turma…" : "Encontrando sua turma…";
             screen.SetEnabled(false);
@@ -285,11 +294,14 @@ namespace Aprender
             interactionButton.style.display = DisplayStyle.None;
             Box(bottom, "spacer");
             Btn(bottom, "Acenar", () => world.Wave(), "secondary");
-            var dpad = Box(screen, "dpad");
-            Direction(dpad, "↑", new Vector2(0, 1), "up");
-            Direction(dpad, "←", new Vector2(-1, 0), "left");
-            Direction(dpad, "↓", new Vector2(0, -1), "down");
-            Direction(dpad, "→", new Vector2(1, 0), "right");
+            if (!CreateMobileControls(screen))
+            {
+                var dpad = Box(screen, "dpad");
+                Direction(dpad, "↑", new Vector2(0, 1), "up");
+                Direction(dpad, "←", new Vector2(-1, 0), "left");
+                Direction(dpad, "↓", new Vector2(0, -1), "down");
+                Direction(dpad, "→", new Vector2(1, 0), "right");
+            }
             world.InputEnabled = true;
             world.ApplyPlayers(session.Players);
         }
@@ -311,6 +323,7 @@ namespace Aprender
             Text(friends, "Nesta ilha", "eyebrow");
             Text(friends, "Colegas · " + (inRoom.Length + 1), "guide-title");
             var scroll = new ScrollView(ScrollViewMode.Vertical);
+            ConfigureMobileScrollView(scroll);
             scroll.AddToClassList("friend-scroll");
             friends.Add(scroll);
             friendList = scroll.contentContainer;
@@ -343,10 +356,12 @@ namespace Aprender
         {
             if (overlay != null) overlay.RemoveFromHierarchy();
             modalOpen = true;
+            SetMobileControlsEnabled(false);
             world.InputEnabled = false;
             world.TouchMove = Vector2.zero;
             overlay = Box(screen, "overlay");
             var scroll = new ScrollView(ScrollViewMode.Vertical);
+            ConfigureMobileScrollView(scroll);
             scroll.AddToClassList("modal-scroll");
             overlay.Add(scroll);
             return Box(scroll.contentContainer, "modal card " + css);
@@ -526,6 +541,7 @@ namespace Aprender
             Text(panel, "Controles", "title");
             var controls = GameControls.Connected
                 ? "Analógico esquerdo: caminhar\n" + GameControls.ConfirmLabel + ": interagir / confirmar\n" + GameControls.CancelLabel + ": voltar\n" + GameControls.WaveLabel + ": acenar\n" + GameControls.MenuLabel + ": ajuda e pausa\n" + GameControls.HUDLabel + ": navegar pelos botões da tela\n\nNos campos de texto, confirme para abrir o teclado na tela."
+                : IsMobileUI ? "Arraste o controle no canto esquerdo para caminhar.\nAproxime-se de um portal ou livro e toque no botão de ação.\nUse os botões da tela para voltar à praça, acenar ou abrir a ajuda."
                 : "WASD ou setas: caminhar\nE: entrar no portal ou abrir o livro\nEspaço: acenar\nEsc: ajuda / voltar\n\nVocê também pode usar os botões na tela.";
             Text(panel, controls + "\n\nEm cada ilha, escolha um desafio e confira suas respostas. Os colegas da turma aparecem na mesma ilha.", "body wrap help-copy");
             Btn(panel, "Voltar ao jogo", CloseModal, "primary");
@@ -639,9 +655,14 @@ namespace Aprender
         static string SubjectSymbol(string id) => id == "matematica" ? "+" : id == "portugues" ? "Aa" : "✿";
         static Color SubjectColor(string id) => id == "matematica" ? new Color(0.53f, 0.40f, 0.84f) : id == "portugues" ? new Color(0.90f, 0.55f, 0.31f) : new Color(0.26f, 0.64f, 0.51f);
 
+        void OnApplicationFocus(bool focused) => SetMobileApplicationFocus(focused);
+
+        void OnApplicationPause(bool paused) => SetMobileApplicationPaused(paused);
+
         void OnDestroy()
         {
             DisposeControllerUI();
+            DisposeMobileUI();
             if (positiveTone != null) Destroy(positiveTone);
             if (gentleTone != null) Destroy(gentleTone);
         }

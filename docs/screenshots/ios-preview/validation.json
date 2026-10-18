@@ -1,0 +1,59 @@
+{
+  "unity": "6000.0.83f1",
+  "referenceDevice": "iPhone XR / iOS 18",
+  "preview": {
+    "resolution": [
+      896,
+      414
+    ],
+    "safeInsetsLeftTopRightBottom": [
+      44,
+      0,
+      44,
+      21
+    ]
+  },
+  "status": "passed in Unity Editor",
+  "checks": [
+    "runtime panel clone and density scale",
+    "simulated notch and home-indicator safe area",
+    "native keyboard field configuration and no autofocus",
+    "field scrolling and loopback server validation",
+    "real UI Toolkit touch down, drag, release and cancel events",
+    "second-pointer isolation and capture loss",
+    "movement blocked by modal, focus loss and pause",
+    "HUD replacement and touch reset",
+    "hybrid gamepad and touch visibility",
+    "primary actions visible without initial scrolling on XR",
+    "long question layout and scrolling",
+    "offline practice, four answers, explanations, result and saved progress",
+    "iOS player settings and missing-module export preflight",
+    "LAN-only ATS plist syntax and idempotence"
+  ],
+  "rendering": "Actual Unity Metal rendering with UI Toolkit",
+  "notTested": [
+    "physical iPhone",
+    "physical controllers",
+    "native iOS keyboard appearance",
+    "iOS local-network permission and ATS on device",
+    "device performance and thermals",
+    "Xcode export, signing and installation"
+  ],
+  "missingBuildDependencies": [
+    "iOS Build Support for Unity 6000.0.83f1",
+    "Xcode"
+  ],
+  "additionalPreview": {
+    "resolution": [
+      568,
+      320
+    ],
+    "safeInsetsLeftTopRightBottom": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "overflow": "finger scrolling for forms and long content"
+  }
+}

@@ -18,6 +18,7 @@ namespace Aprender
         public Vector3 LocalPosition => localActor == null ? Vector3.zero : localActor.position;
         public float LocalYaw => localActor == null ? 0 : localActor.eulerAngles.y;
         public bool InputEnabled { get; set; }
+        public bool UseMobileFraming { get; set; }
         public Vector2 TouchMove { get; set; }
         public bool CanInteract => InputEnabled && nearestInteraction != null;
         public string NearbyActionLabel => nearestInteraction == null ? "" : nearestInteraction.label;
@@ -287,7 +288,15 @@ namespace Aprender
             worldCamera.orthographicSize = CameraSize();
         }
 
-        private float CameraSize() => Mathf.Max(8.2f, 10.8f / Mathf.Max(.65f, worldCamera.aspect));
+        private float CameraSize()
+        {
+            // Reserve vertical space for the phone header and thumb controls.
+            // Desktop keeps the existing field of view.
+            // A 16:9 phone has less room above the portals than a wide XR display.
+            var phoneHeight = worldCamera.aspect < 1.9f ? 11.2f : 9.8f;
+            var minimumHeight = UseMobileFraming ? phoneHeight : 8.2f;
+            return Mathf.Max(minimumHeight, 10.8f / Mathf.Max(.65f, worldCamera.aspect));
+        }
 
         private Vector3 CameraTarget(Vector3 follow)
         {

@@ -6,13 +6,17 @@ Jogo educativo 3D em português para crianças de aproximadamente 7 anos, em **U
 
 1. Instale o Unity Editor **6000.0.83f1** pelo Unity Hub e abra esta pasta como projeto. Aguarde a importação dos pacotes e modelos.
 2. Use **Ilha do Saber > Abrir jogo**. A preparação configura o renderizador 3D, a interface e os seis personagens Kenney automaticamente. A cena é `Assets/Aprender/Scenes/IlhaDoSaber.unity`.
-3. Pressione **Play**, escolha um nome e um personagem e toque em **Quero praticar sozinho**. Esse modo funciona inteiramente sem servidor.
+3. Pressione **Play**, escolha um nome e um personagem e toque em **Jogar sozinho**. Esse modo funciona inteiramente sem servidor.
 
 O projeto já aponta a cena do jogo como cena de build. Depois da preparação, Play inicia essa cena mesmo que outra esteja aberta. Para refazer a configuração, use **Ilha do Saber > Preparar projeto**. O código, as cenas, os prefabs, os tutoriais e os pacotes exclusivos do template multiplayer original foram removidos. O tema da interface foi mantido em `Assets/Aprender/Resources/UnityDefaultRuntimeTheme.tss`; as configurações ativas de renderização e entrada também foram preservadas.
 
 ## Controles Xbox e Nintendo no macOS
 
 A branch `macOs` inclui caminhada, interação e navegação da interface por gamepad, com teclado na tela para inserir nome, código da turma e servidor. Consulte [os controles](docs/CONTROLES.md). Os títulos dos portais usam placas de alto contraste; a interface prioriza ações diretas e mantém a praça livre de painéis grandes.
+
+## Versão para iPhone
+
+A branch `iOS` inclui interface de toque em paisagem, joystick, teclado nativo e respeito à área segura da tela, com o **iPhone XR** como referência. O menu **Ilha do Saber > iOS > Preparar iPhone** configura o projeto; **Exportar projeto Xcode** verifica o módulo instalado antes de exportar. Veja [o guia de iPhone](docs/IOS.md) para instalar o módulo iOS da Unity, configurar o Xcode e conectar o aparelho à turma.
 
 ## Jogar com a turma
 
@@ -24,7 +28,7 @@ node backend/server.mjs
 
 Também é possível iniciar pelo menu **Ilha do Saber > Servidor > Iniciar servidor local** no Editor. Esse processo é encerrado quando o Editor fecha ou recompila scripts. Para uma aula inteira, prefira o comando acima em um terminal separado.
 
-1. No jogo, abra **Configurar turma · para professores**. No computador do servidor, use `http://localhost:8787`. Nos demais, use `http://IP-DO-SERVIDOR:8787`.
+1. No jogo, abra **Entrar na turma > Configuração da turma**. No computador do servidor, use `http://localhost:8787`. Nos demais, use `http://IP-DO-SERVIDOR:8787`.
 2. Escolha nome e personagem e toque em **Criar uma sessão de turma**. O código gerado aparece no topo do jogo.
 3. Os colegas configuram o mesmo endereço, digitam esse código e usam **Entrar**.
 4. Colegas na mesma ilha aparecem como personagens e na lista lateral. Em ilhas diferentes, deixam de aparecer naquela sala. Não há colegas simulados.
