@@ -1,0 +1,18 @@
+{
+  "unity": "6000.0.83f1",
+  "status": "passed",
+  "controllers": "InputSystem virtual Gamepad and SwitchProControllerHID; no physical controller test",
+  "checks": [
+    "controller directional and analog navigation",
+    "on-screen Unicode keyboard",
+    "cancel and commit",
+    "single submit",
+    "foldout and scroll",
+    "movement capture",
+    "reconnection",
+    "portal bounds and orientation",
+    "offline practice and four-question quiz",
+    "saved progress"
+  ],
+  "rendering": "actual Unity Metal render with UI Toolkit panel"
+}

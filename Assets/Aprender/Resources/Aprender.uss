@@ -1,17 +1,17 @@
-.app { flex-grow: 1; color: #263735; font-size: 18px; -unity-font-style: normal; }
+.app { flex-grow: 1; color: #26392f; font-size: 18px; -unity-font-style: normal; }
 .screen { flex-grow: 1; background-color: #f7f7ef; }
 .row { flex-direction: row; align-items: center; }
 .spacer { flex-grow: 1; }
 .card { background-color: #ffffff; border-radius: 22px; border-width: 1px; border-color: #e5e8df; }
 Label { margin: 0; padding: 0; }
-Button { margin: 0; border-width: 0; border-radius: 12px; padding: 12px 18px; color: #263735; font-size: 17px; -unity-font-style: bold; background-color: #edf0e8; min-height: 48px; }
+Button { margin: 0; border-width: 0; border-radius: 12px; padding: 12px 18px; color: #26392f; font-size: 17px; -unity-font-style: bold; background-color: #edf0e8; min-height: 48px; }
 Button:hover { background-color: #e2e9da; }
-Button:focus { border-width: 3px; border-color: #7463b8; }
+Button:focus { border-width: 3px; border-color: #d6a94f; }
 Button:active { background-color: #c8dda4; scale: 0.98 0.98; }
 Button:disabled { opacity: 0.55; }
-.primary { background-color: #d6ee9e; color: #283d24; padding: 15px 23px; border-radius: 12px; }
-.primary:hover { background-color: #c5e680; }
-.primary:active { background-color: #b7d96c; }
+.primary { background-color: #2f614d; color: #ffffff; padding: 15px 23px; border-radius: 12px; }
+.primary:hover { background-color: #3c735b; }
+.primary:active { background-color: #28523f; }
 .secondary { background-color: white; border-width: 1px; border-color: #d8dfd3; }
 .secondary:hover { background-color: #f1f5eb; }
 .quiet { background-color: transparent; color: #64716b; padding: 8px 12px; }
@@ -27,7 +27,7 @@ Button:disabled { opacity: 0.55; }
 .title { font-size: 32px; -unity-font-style: bold; letter-spacing: -1px; margin-top: 12px; margin-bottom: 9px; white-space: normal; }
 .guide-title { font-size: 19px; -unity-font-style: bold; margin-top: 8px; margin-bottom: 8px; white-space: normal; }
 .brand { flex-shrink: 0; }
-.brand-icon { width: 36px; height: 36px; background-color: #d6ee9e; color: #344b2b; border-radius: 11px; font-size: 31px; -unity-font-style: bold; -unity-text-align: middle-center; rotate: -9deg; }
+.brand-icon { width: 36px; height: 36px; background-color: #2f614d; color: #344b2b; border-radius: 11px; font-size: 31px; -unity-font-style: bold; -unity-text-align: middle-center; rotate: -9deg; }
 .brand-name { font-size: 24px; letter-spacing: -1px; -unity-font-style: bold; margin-left: 11px; }
 .login-header { justify-content: space-between; padding: 25px 50px 12px 50px; }
 .login-scroll { flex-grow: 1; }
@@ -37,21 +37,13 @@ Button:disabled { opacity: 0.55; }
 .hero-title { font-size: 60px; letter-spacing: -2px; -unity-font-style: bold; margin-top: 18px; }
 .hero-copy { font-size: 17px; color: #758079; margin-top: 19px; white-space: normal; }
 .hero-art { position: relative; height: 270px; margin-top: 14px; overflow: hidden; }
-.orbit { position: absolute; width: 260px; height: 260px; border-radius: 160px; background-color: #e6e9d9; left: 38px; top: 7px; }
-.orbit-plus { font-size: 160px; color: #d7ddc7; -unity-text-align: middle-center; }
 .hero-pet { position: absolute; width: 265px; height: 265px; top: 10px; left: 28px; }
-.hero-pet-small { position: absolute; width: 150px; height: 150px; top: 110px; left: 237px; rotate: 8deg; }
-.sticker { position: absolute; border-radius: 12px; padding: 10px 16px; -unity-font-style: bold; font-size: 17px; }
-.sticker-numbers { background-color: #e3dbf3; color: #68558d; left: 256px; top: 34px; rotate: 10deg; }
-.sticker-letters { background-color: #f6ddc8; color: #825a36; left: 8px; top: 208px; rotate: -7deg; }
-.hero-footer { margin-top: 15px; }
-.footer-number { font-size: 30px; color: #91a17a; margin-right: 16px; }
 .login-card { width: 51%; max-width: 580px; padding: 22px 30px; }
 .login-card .title { margin-top: 0; }
 .field-title { font-size: 15px; -unity-font-style: bold; margin-top: 21px; margin-bottom: 9px; }
 .text-input { height: 49px; margin: 0; font-size: 20px; }
-.text-input > .unity-text-field__input { background-color: #f7f8f2; border-width: 1px; border-color: #dce2d6; border-radius: 10px; padding: 9px 13px; color: #263735; }
-.text-input > .unity-text-field__input:focus { border-color: #8977bc; border-width: 2px; }
+.text-input > .unity-text-field__input { background-color: #f7f8f2; border-width: 1px; border-color: #dce2d6; border-radius: 10px; padding: 9px 13px; color: #26392f; }
+.text-input > .unity-text-field__input:focus { border-color: #386d58; border-width: 2px; }
 .text-input > .unity-text-field__input > .unity-text-element { -unity-text-align: middle-left; }
 .code-row { align-items: stretch; }
 .code-input { flex-grow: 1; width: 110px; margin-right: 10px; letter-spacing: 3px; }
@@ -59,7 +51,7 @@ Button:disabled { opacity: 0.55; }
 .pet-grid { flex-wrap: wrap; justify-content: space-between; }
 .pet-choice { width: 15.8%; padding: 5px 2px; background-color: #f6f7f1; border-width: 2px; border-color: transparent; min-height: 90px; align-items: center; }
 .pet-choice:hover { background-color: #eeefdf; }
-.pet-choice.selected { border-color: #8d79b4; background-color: #f0eaf8; }
+.pet-choice.selected { border-color: #386d58; background-color: #e6eee2; }
 .pet-thumb { width: 62px; height: 60px; }
 .pet-name { font-size: 11px; color: #69756c; -unity-font-style: normal; }
 .status { color: #a55236; font-size: 13px; white-space: normal; margin-top: 8px; }
@@ -69,7 +61,6 @@ Button:disabled { opacity: 0.55; }
 .teacher .unity-foldout__content { margin-left: 0; margin-top: 8px; }
 .teacher .secondary { font-size: 13px; margin-top: 9px; min-height: 38px; }
 .server-input { height: 40px; font-size: 13px; margin-top: 8px; }
-.login-footer { font-size: 10px; letter-spacing: 2px; color: #8b9389; padding: 8px 50px 19px 50px; }
 .game-screen { background-color: transparent; }
 .hud-top { background-color: rgba(255, 255, 255, 0.960784); padding: 17px 24px; border-bottom-width: 1px; border-bottom-color: #e2e7db; }
 .hud-top .brand-name { font-size: 22px; }
@@ -113,17 +104,17 @@ Button:disabled { opacity: 0.55; }
 .progress-row { margin-top: 25px; margin-bottom: 30px; }
 .progress-step { height: 6px; background-color: #e8ece1; flex-grow: 1; border-radius: 5px; margin-right: 7px; }
 .progress-step.done { background-color: #a6c46d; }
-.progress-step.current { background-color: #9e87c8; }
-.question-count { color: #8c78ad; }
+.progress-step.current { background-color: #d6a94f; }
+.question-count { color: #57705b; }
 .question-text { font-size: 29px; -unity-font-style: bold; white-space: normal; margin-top: 12px; margin-bottom: 14px; }
 .options { flex-wrap: wrap; justify-content: space-between; margin-top: 20px; }
 .answer-choice { width: 48.8%; min-height: 84px; background-color: #f7f8f2; border-width: 2px; border-color: #e3e7db; border-radius: 15px; padding: 16px; margin-bottom: 13px; justify-content: flex-start; }
-.answer-choice.selected { background-color: #f0eafa; border-color: #9c83c3; }
+.answer-choice.selected { background-color: #e6eee2; border-color: #386d58; }
 .answer-choice.correct { background-color: #eaf4d7; border-color: #93b85b; }
 .answer-choice.try-again { background-color: #fbefdc; border-color: #d8b57c; }
 .answer-choice:disabled { opacity: 1; }
 .options:disabled { opacity: 1; }
-.options:disabled .answer-text { color: #263735; }
+.options:disabled .answer-text { color: #26392f; }
 .options:disabled .answer-letter { color: #6d7a67; }
 .answer-letter { width: 32px; height: 32px; background-color: white; color: #84917c; border-radius: 9px; -unity-text-align: middle-center; font-size: 15px; margin-right: 13px; flex-shrink: 0; }
 .answer-text { font-size: 19px; white-space: normal; flex-shrink: 1; }
@@ -154,3 +145,91 @@ Button:disabled { opacity: 0.55; }
 .compact .hud-top .brand-name { display: none; }
 .compact .vertical-divider { margin-left: 16px; margin-right: 16px; }
 .compact .session-pill { font-size: 10px; margin-right: 7px; }
+
+/* Ilha do Saber: papel claro, tinta verde e sinais de matéria. */
+.screen { background-color: #f4f0e4; }
+.card { border-radius: 8px; border-color: #d8d8c9; }
+Button { border-radius: 6px; min-height: 48px; border-width: 2px; border-color: transparent; }
+Button:focus { border-width: 2px; border-color: #b18227; }
+.primary { border-radius: 6px; color: white; }
+.primary:hover { color: white; }
+.quiet { border-radius: 5px; }
+.title { font-size: 29px; letter-spacing: 0; }
+.eyebrow { letter-spacing: 0.6px; font-size: 12px; }
+.brand-icon { width: 34px; height: 34px; border-radius: 4px; font-size: 15px; letter-spacing: 1px; rotate: 0deg; background-color: #2f614d; color: white; }
+.brand-name { font-size: 21px; letter-spacing: 0; }
+.login-header { padding: 24px 42px 18px; border-bottom-width: 1px; border-bottom-color: #d9d9cb; }
+.header-subjects { color: #6b7667; font-size: 14px; }
+.login-columns { padding: 30px 42px; align-items: center; }
+.hero { width: 43%; max-width: 500px; padding: 20px 50px 20px 0; }
+.hero-title { font-size: 46px; letter-spacing: -1px; color: #244534; white-space: normal; }
+.hero-copy { font-size: 20px; color: #526451; margin-top: 18px; }
+.hero-art { height: 285px; margin-top: 18px; }
+.pet-ground { position: absolute; background-color: #dedfbb; width: 270px; height: 72px; border-radius: 50%; top: 204px; left: 13px; }
+.hero-pet { width: 290px; height: 285px; top: 0; left: 8px; }
+.hero-note { font-size: 15px; color: #677460; white-space: normal; max-width: 330px; margin-top: 15px; }
+.login-card { width: 57%; max-width: 590px; padding: 25px 28px; }
+.field-title { margin-top: 17px; font-size: 16px; }
+.text-input > .unity-text-field__input { border-radius: 5px; border-color: #bdc8b9; background-color: #fafbf6; }
+.pet-choice { min-height: 91px; border-radius: 5px; background-color: #f1f2e8; }
+.pet-choice.selected { border-color: #386d58; background-color: #e6eee2; }
+.pet-name { font-size: 12px; color: #3e5542; }
+.practice-button { width: 100%; margin-top: 17px; border-radius: 6px; font-size: 18px; background-color: #2f614d; color: white; border-top-width: 2px; border-top-color: transparent; }
+.practice-button:hover { background-color: #3c735b; color: white; }
+.classroom { margin-top: 20px; border-top-width: 1px; border-top-color: #d7ddcf; padding-top: 12px; }
+.classroom > .unity-foldout__toggle { min-height: 42px; font-size: 16px; }
+.classroom .unity-foldout__content { margin-left: 0; }
+.teacher { font-size: 14px; }
+.teacher > .unity-foldout__toggle { min-height: 40px; }
+.hud-top { padding: 9px 20px; min-height: 62px; background-color: rgba(249, 249, 239, 0.97); }
+.hud-top .brand-name { font-size: 19px; }
+.location-title { margin-top: 0; font-size: 17px; }
+.vertical-divider { height: 26px; margin-left: 18px; margin-right: 18px; }
+.session-pill { border-radius: 4px; font-size: 12px; padding: 7px 11px; margin-right: 7px; background-color: #e8ecde; color: #3b5d42; }
+.stars-pill { border-radius: 4px; padding: 7px 10px; font-size: 15px; }
+.small-button { min-height: 42px; font-size: 13px; }
+.world-guide { top: 82px; left: 20px; width: 215px; padding: 0; }
+.world-guide > Foldout { padding: 9px 12px; background-color: rgba(249, 249, 239, 0.96); border-radius: 5px; border-width: 1px; border-color: #d0d8bd; }
+.world-guide .unity-foldout__toggle { min-height: 32px; font-size: 15px; }
+.world-guide .unity-foldout__content { margin-left: 0; }
+.subject-link { margin-top: 8px; border-radius: 4px; min-height: 43px; }
+.friends-card { top: 82px; right: 20px; padding: 9px 12px; border-radius: 5px; background-color: rgba(249, 249, 239, 0.96); width: 215px; }
+.friends-card .unity-foldout__toggle { min-height: 32px; }
+.friend-avatar { border-radius: 4px; }
+.hud-bottom { bottom: 25px; left: 20px; right: 20px; }
+.key-hint { font-size: 12px; border-radius: 4px; }
+.dpad { opacity: 0.82; }
+.controller-mode .dpad, .controller-mode .key-hint { display: none; }
+.overlay { background-color: rgba(22, 42, 30, 0.65); }
+.modal { border-radius: 8px; background-color: #fafbf4; }
+.modal-scroll .unity-scroll-view__content-container { padding: 24px; }
+.quiz-choice { border-radius: 5px; background-color: #ebeee2; }
+.progress-step { border-radius: 0; height: 5px; }
+.question-text { font-size: 28px; }
+.answer-choice { border-radius: 6px; }
+.answer-letter { border-radius: 4px; color: #3d5c43; }
+.feedback { border-radius: 5px; }
+.result-recap { border-radius: 5px; }
+.result-stars { font-size: 60px; letter-spacing: 6px; }
+.compact .hero { display: none; }
+.compact .header-subjects { display: none; }
+.compact .world-guide { width: 205px; padding: 0; }
+.compact .friends-card { width: 200px; }
+.compact .hud-top { padding: 8px 14px; }
+.compact .login-columns { padding: 22px 28px; }
+.controller-focus { border-width: 3px; border-color: #d5a23d; background-color: #faf2d7; }
+.primary.controller-focus, .practice-button.controller-focus { background-color: #315e49; color: white; border-color: #e5ba5b; }
+.controller-focus > .unity-text-field__input { border-color: #b18227; border-width: 3px; }
+.controller-hint { position: absolute; bottom: 3px; left: 0; right: 0; -unity-text-align: middle-center; font-size: 12px; padding: 5px 10px; color: #2c4533; background-color: rgba(250, 251, 244, 0.96); }
+.controller-keyboard-overlay { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background-color: rgba(22, 42, 30, 0.78); align-items: center; justify-content: center; }
+.controller-keyboard { width: 820px; max-width: 96%; padding: 20px; background-color: #f4f0e4; }
+.controller-keyboard-title { font-size: 24px; margin-top: 0; }
+.controller-keyboard-preview { background-color: white; padding: 12px 14px; min-height: 49px; margin-top: 8px; margin-bottom: 10px; font-size: 23px; color: #244534; border-width: 1px; border-color: #acbca3; }
+.controller-keyboard-row { justify-content: center; margin-bottom: 5px; }
+.controller-key { min-width: 48px; min-height: 45px; margin: 2px; padding: 6px 10px; background-color: white; }
+.controller-keyboard-actions { justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+.controller-keyboard-actions Button { margin: 3px; padding: 8px 13px; }
+.controller-keyboard-help { margin-top: 5px; }
+.controller-keyboard-error { min-height: 18px; }
+.screen.game-screen { background-color: transparent; }
+.pet-choice.controller-focus, .answer-choice.controller-focus { border-color: #d5a23d; background-color: #faf2d7; }

@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 namespace Aprender
 {
     /// <summary>The complete child-facing flow. World and session services remain independent of the UI.</summary>
-    public sealed class GameBootstrap : MonoBehaviour
+    public sealed partial class GameBootstrap : MonoBehaviour
     {
         GameSession session;
         WorldController world;
@@ -57,6 +57,7 @@ namespace Aprender
             root.AddToClassList("app");
             var css = Resources.Load<StyleSheet>("Aprender");
             if (css != null) root.styleSheets.Add(css);
+            InitializeControllerUI();
             root.RegisterCallback<GeometryChangedEvent>(_ => root.EnableInClassList("compact", root.resolvedStyle.width < 1100));
             StartCoroutine(Initialize());
         }
@@ -69,6 +70,7 @@ namespace Aprender
 
         void Update()
         {
+            UpdateControllerUI();
             if (session == null || world == null || !session.IsJoined) return;
             presenceClock += Time.unscaledDeltaTime;
             if (presenceClock > 0.2f)
@@ -81,7 +83,7 @@ namespace Aprender
                 interactionLabel.text = world.NearbyActionLabel;
                 interactionButton.style.display = world.CanInteract && !modalOpen ? DisplayStyle.Flex : DisplayStyle.None;
             }
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (!ControllerConsumedEscape && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 if (modalOpen) CloseModal();
                 else ShowHelp();
@@ -90,6 +92,7 @@ namespace Aprender
 
         void ResetUI()
         {
+            ControllerUIReset();
             root.Clear();
             screen = Box(root, "screen");
             overlay = null;
@@ -106,38 +109,28 @@ namespace Aprender
             world.InputEnabled = false;
             var header = Box(screen, "login-header row");
             Brand(header);
-            Text(header, "PEQUENAS DESCOBERTAS. GRANDES AVENTURAS.", "eyebrow muted");
+            Text(header, "Matemática · Português · Ciências", "header-subjects");
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("login-scroll");
             screen.Add(scroll);
             var columns = Box(scroll.contentContainer, "login-columns row");
             var hero = Box(columns, "hero");
-            Text(hero, "UM CONVITE PARA EXPLORAR", "eyebrow");
-            Text(hero, "A curiosidade\nabre portais.", "hero-title");
-            Text(hero, "Escolha seu companheiro, encontre sua turma\ne descubra algo novo a cada aventura.", "hero-copy");
+            Text(hero, "Ilha do Saber", "hero-title");
+            Text(hero, "Explore a praça e encontre os desafios de cada matéria.", "hero-copy");
             var art = Box(hero, "hero-art");
-            var orbit = Box(art, "orbit");
-            Text(orbit, "+", "orbit-plus");
-            var largePet = PetImage(art, "dog", "hero-pet");
-            largePet.style.rotate = new Rotate(Angle.Degrees(-8));
-            var smallPet = PetImage(art, "cat", "hero-pet-small");
-            Text(art, "1, 2, 3…", "sticker sticker-numbers");
-            Text(art, "Olá, mundo!", "sticker sticker-letters");
-            var footer = Box(hero, "hero-footer row");
-            Text(footer, "01", "footer-number");
-            Text(footer, "Aprenda no seu ritmo.\nAqui, cada tentativa é uma descoberta.", "small");
+            Box(art, "pet-ground");
+            var featuredPet = PetImage(art, selectedAvatar, "hero-pet");
+            Text(hero, "Caminhe pelos portais. Escolha um desafio. Jogue no seu ritmo.", "hero-note");
 
             var card = Box(columns, "login-card card");
-            Text(card, "Vamos começar?", "title");
-            Text(card, "Sua aventura começa com você.", "muted body");
-            Text(card, "1   Como podemos chamar você?", "field-title");
-            nameField = new TextField { value = enteredName, maxLength = 20 };
+            Text(card, "Vamos jogar", "title");
+            Text(card, "Seu nome", "field-title");
+            nameField = new TextField { value = enteredName, maxLength = 20, name = "player-name" };
             nameField.AddToClassList("text-input");
-            nameField.tooltip = "Digite um apelido de 2 a 20 letras. Não precisa do nome completo.";
+            nameField.tooltip = "Use um nome ou apelido com 2 a 20 caracteres.";
             nameField.RegisterValueChangedCallback(e => enteredName = e.newValue);
             card.Add(nameField);
-            Text(card, "Pode ser seu primeiro nome ou apelido.", "hint");
-            Text(card, "2   Quem vai com você?", "field-title");
+            Text(card, "Seu animal", "field-title");
             var pets = Box(card, "pet-grid row");
             foreach (var avatar in AvatarCatalog.Items)
             {
@@ -146,6 +139,7 @@ namespace Aprender
                 {
                     selectedAvatar = id;
                     foreach (var child in pets.Children()) child.EnableInClassList("selected", child.name == id);
+                    featuredPet.image = Resources.Load<Texture2D>("AvatarPreviews/" + id);
                 }) { name = id, tooltip = "Escolher " + avatar.name };
                 button.AddToClassList("pet-choice");
                 button.EnableInClassList("selected", selectedAvatar == id);
@@ -153,37 +147,39 @@ namespace Aprender
                 Text(button, avatar.name, "pet-name");
                 pets.Add(button);
             }
-            Text(card, "3   Encontre sua turma", "field-title");
-            var codeRow = Box(card, "row code-row");
-            codeField = new TextField { value = enteredCode, maxLength = 8 };
+            status = Text(card, "", "status");
+            Btn(card, "Jogar sozinho", StartPractice, "primary practice-button");
+            Text(card, "Funciona sem conexão com a internet.", "hint");
+            var classroom = new Foldout { text = "Entrar na turma", value = false, name = "classroom-options" };
+            classroom.AddToClassList("classroom");
+            card.Add(classroom);
+            Text(classroom.contentContainer, "Código da turma", "field-title");
+            var codeRow = Box(classroom.contentContainer, "row code-row");
+            codeField = new TextField { value = enteredCode, maxLength = 8, name = "classroom-code" };
             codeField.AddToClassList("text-input");
             codeField.AddToClassList("code-input");
-            codeField.tooltip = "Código compartilhado pelo professor";
             codeField.RegisterValueChangedCallback(e => enteredCode = e.newValue.ToUpperInvariant());
             codeRow.Add(codeField);
-            Btn(codeRow, "Entrar  →", () => Join(false), "primary join-button");
-            Text(card, "Digite o código que seu professor compartilhou.", "hint");
-            status = Text(card, "", "status");
-            Btn(card, "Quero praticar sozinho  →", StartPractice, "practice-button");
-            var teacher = new Foldout { text = "Configurar turma · para professores", value = false };
+            Btn(codeRow, "Entrar", () => Join(false), "secondary join-button");
+            Text(classroom.contentContainer, "Peça o código ao professor.", "hint");
+            var teacher = new Foldout { text = "Configuração da turma", value = false };
             teacher.AddToClassList("teacher");
-            card.Add(teacher);
-            Text(teacher.contentContainer, "Endereço do servidor da escola", "hint");
-            serverField = new TextField { value = enteredServer, maxLength = 200 };
+            classroom.Add(teacher);
+            Text(teacher.contentContainer, "Endereço do servidor", "field-title");
+            serverField = new TextField { value = enteredServer, maxLength = 200, name = "classroom-server" };
             serverField.AddToClassList("text-input");
             serverField.AddToClassList("server-input");
             serverField.RegisterValueChangedCallback(e => enteredServer = e.newValue);
             teacher.Add(serverField);
-            Btn(teacher.contentContainer, "Criar uma sessão de turma", () => Join(true), "secondary");
-            Text(teacher.contentContainer, "O servidor precisa estar ligado. Compartilhe o código gerado com a turma.", "hint wrap");
-            Text(screen, "ILHA DO SABER     /     Um lugar para aprender brincando", "login-footer");
-            nameField.Focus();
+            Btn(teacher.contentContainer, "Criar turma", () => Join(true), "secondary");
+            Text(teacher.contentContainer, "Use o mesmo servidor nos aparelhos da turma.", "hint wrap");
+            if (!Application.isMobilePlatform && !GameControls.Connected) nameField.Focus();
         }
 
         bool ValidateName()
         {
-            enteredName = (enteredName ?? "").Trim();
-            if (!System.Text.RegularExpressions.Regex.IsMatch(enteredName, @"^[\p{L}\p{N}\p{M} -]{2,20}$"))
+            enteredName = GameTextInputRules.NormalizePlayerName(enteredName);
+            if (!GameTextInputRules.IsValidPlayerName(enteredName))
             {
                 status.text = "Escolha um nome ou apelido com 2 a 20 caracteres.";
                 nameField.Focus();
@@ -246,37 +242,40 @@ namespace Aprender
             screen.pickingMode = PickingMode.Ignore;
             var top = Box(screen, "hud-top row");
             Brand(top);
-            var divider = Box(top, "vertical-divider");
-            var location = Box(top, "location");
-            Text(location, "VOCÊ ESTÁ EM", "eyebrow tiny");
-            roomLabel = Text(location, RoomTitle(world.RoomId), "location-title");
+            Box(top, "vertical-divider");
+            roomLabel = Text(top, RoomTitle(world.RoomId), "location-title");
             Box(top, "spacer");
-            Text(top, session.IsOnline ? "●  TURMA " + session.SessionCode : "●  MODO PRÁTICA", "session-pill");
-            starsLabel = Text(top, "★  " + ProgressStore.Instance.TotalStars, "stars-pill");
-            soundButton = Btn(top, muted ? "Som: desligado" : "Som: ligado", ToggleSound, "quiet small-button");
-            Btn(top, "?", ShowHelp, "help-button");
+            Text(top, session.IsOnline ? "Turma " + session.SessionCode : "Prática", "session-pill");
+            starsLabel = Text(top, "★ " + ProgressStore.Instance.TotalStars, "stars-pill");
+            soundButton = Btn(top, muted ? "Som: não" : "Som: sim", ToggleSound, "quiet small-button");
+            Btn(top, "Ajuda", ShowHelp, "quiet small-button");
             Btn(top, "Sair", ShowLeave, "quiet small-button");
 
-            var left = Box(screen, "world-guide card");
-            Text(left, "SUA PRÓXIMA DESCOBERTA", "eyebrow");
-            Text(left, world.RoomId == "hub" ? "Qual portal vamos abrir?" : "Um desafio espera por você!", "guide-title");
-            Text(left, world.RoomId == "hub" ? "Caminhe até um portal ou escolha\numa das ilhas aqui embaixo." : "Vá até o livro brilhante ou toque\nno botão para escolher um quiz.", "muted small");
+            var guide = Box(screen, "world-guide");
             if (world.RoomId == "hub")
             {
+                var destinations = new Foldout { text = "Ir para uma ilha", value = false };
+                guide.Add(destinations);
                 foreach (var subject in session.Catalog.subjects)
                 {
                     var id = subject.id;
-                    var b = Btn(left, SubjectSymbol(id) + "   " + subject.title + "    →", () => EnterRoom(id), "subject-link");
-                    b.style.borderLeftColor = SubjectColor(id);
+                    var button = Btn(destinations.contentContainer, subject.title, () => EnterRoom(id), "subject-link");
+                    button.style.borderLeftColor = SubjectColor(id);
                 }
             }
-            else Btn(left, "Abrir desafios  →", ShowQuizList, "primary");
+            else Btn(guide, "Escolher desafio", ShowQuizList, "secondary");
 
-            friends = Box(screen, "friends-card card");
-            RefreshFriends();
+            if (session.IsOnline)
+            {
+                var classmates = new Foldout { text = "Colegas", value = false };
+                classmates.AddToClassList("friends-card");
+                screen.Add(classmates);
+                friends = Box(classmates.contentContainer, "friends-content");
+                RefreshFriends();
+            }
             var bottom = Box(screen, "hud-bottom row");
-            if (world.RoomId != "hub") Btn(bottom, "←  Voltar à praça", () => EnterRoom("hub"), "secondary");
-            else Text(bottom, "W A S D  /  SETAS\npara caminhar", "key-hint");
+            if (world.RoomId != "hub") Btn(bottom, "Voltar à praça", () => EnterRoom("hub"), "secondary");
+            else Text(bottom, "WASD / setas: caminhar · E: interagir", "key-hint");
             Box(bottom, "spacer");
             interactionButton = new Button(() => world.Interact());
             interactionButton.AddToClassList("primary");
@@ -285,7 +284,7 @@ namespace Aprender
             bottom.Add(interactionButton);
             interactionButton.style.display = DisplayStyle.None;
             Box(bottom, "spacer");
-            Btn(bottom, "Acenar  ♡", () => { world.Wave(); PlayTone(true); }, "secondary");
+            Btn(bottom, "Acenar", () => world.Wave(), "secondary");
             var dpad = Box(screen, "dpad");
             Direction(dpad, "↑", new Vector2(0, 1), "up");
             Direction(dpad, "←", new Vector2(-1, 0), "left");
@@ -309,8 +308,8 @@ namespace Aprender
             if (friends == null) return;
             friends.Clear();
             var inRoom = session.Players.Where(p => p.roomId == world.RoomId && p.id != session.PlayerId).ToArray();
-            Text(friends, "JUNTOS NESTA ILHA", "eyebrow");
-            Text(friends, "Sua turma  ·  " + (inRoom.Length + 1), "guide-title");
+            Text(friends, "Nesta ilha", "eyebrow");
+            Text(friends, "Colegas · " + (inRoom.Length + 1), "guide-title");
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("friend-scroll");
             friends.Add(scroll);
@@ -377,8 +376,8 @@ namespace Aprender
             Text(heading, SubjectSymbol(subject.id) + "   ILHA DE " + subject.title.ToUpperInvariant(), "eyebrow");
             Box(heading, "spacer");
             Btn(heading, "Fechar  ×", CloseModal, "quiet");
-            Text(panel, "O que vamos descobrir?", "title");
-            Text(panel, "Escolha um desafio. Você pode tentar quantas vezes quiser.", "muted body");
+            Text(panel, "Escolha um desafio", "title");
+            Text(panel, "Você pode repetir os desafios quando quiser.", "muted body");
             foreach (var item in subject.quizzes)
             {
                 var q = item;
@@ -386,8 +385,8 @@ namespace Aprender
                 var info = Box(row, "quiz-info");
                 Text(info, q.title, "guide-title");
                 Text(info, q.description, "muted small wrap");
-                Text(info, q.questions.Length + " descobertas  ·  Sem pressa", "hint");
-                Btn(row, "Vamos lá  →", () => BeginQuiz(q), "primary");
+                Text(info, q.questions.Length + " perguntas", "hint");
+                Btn(row, "Começar", () => BeginQuiz(q), "primary");
             }
             status = Text(panel, "", "status");
         }
@@ -425,7 +424,7 @@ namespace Aprender
                 dot.EnableInClassList("done", i < questionIndex);
                 dot.EnableInClassList("current", i == questionIndex);
             }
-            Text(panel, "DESCOBERTA " + (questionIndex + 1) + " DE " + quiz.questions.Length, "eyebrow question-count");
+            Text(panel, "PERGUNTA " + (questionIndex + 1) + " DE " + quiz.questions.Length, "eyebrow question-count");
             Text(panel, question.text, "question-text");
             Text(panel, "Toque na resposta que você escolheu.", "muted body");
             var options = Box(panel, "options row");
@@ -449,9 +448,9 @@ namespace Aprender
             feedback = Box(panel, "feedback");
             status = Text(panel, "", "status");
             var actions = Box(panel, "row question-actions");
-            Text(actions, "Cada tentativa ensina algo novo.", "hint");
+            Text(actions, "Escolha e confira sua resposta.", "hint");
             Box(actions, "spacer");
-            confirmButton = Btn(actions, "Conferir resposta  →", () => SubmitAnswer(question, options), "primary");
+            confirmButton = Btn(actions, "Conferir resposta", () => SubmitAnswer(question, options), "primary");
             confirmButton.SetEnabled(false);
         }
 
@@ -483,10 +482,10 @@ namespace Aprender
                     child.EnableInClassList("try-again", child.name == selectedOption && !result.correct);
                 }
                 feedback.AddToClassList(result.correct ? "success" : "learning");
-                Text(feedback, result.correct ? "Muito bem! Você descobriu!" : "Vamos descobrir juntos!", "guide-title");
+                Text(feedback, result.correct ? "Resposta certa!" : "Veja a explicação", "guide-title");
                 Text(feedback, result.explanation, "body wrap");
                 PlayTone(result.correct);
-                confirmButton.text = result.completed ? "Ver minhas descobertas  →" : "Próxima descoberta  →";
+                confirmButton.text = result.completed ? "Ver resultado" : "Próxima pergunta";
                 confirmButton.SetEnabled(true);
                 // Replace the action instead of adding another callback to the same button.
                 var next = Btn(confirmButton.parent, confirmButton.text, () =>
@@ -505,17 +504,17 @@ namespace Aprender
             var score = lastAnswer.CorrectCount;
             var total = lastAnswer.total;
             var stars = lastAnswer.stars;
-            Text(panel, "AVENTURA CONCLUÍDA", "eyebrow");
+            Text(panel, "Desafio concluído", "eyebrow");
             Text(panel, new string('★', stars) + new string('☆', 3 - stars), "result-stars");
-            Text(panel, "Olha o que você aprendeu!", "title");
-            Text(panel, "Você acertou " + score + " de " + total + " descobertas.", "body");
-            Text(panel, score == total ? "Sua curiosidade foi longe. Que tal explorar outra ilha?" : "Aprender é tentar, descobrir e tentar de novo. Vamos continuar?", "muted body wrap");
+            Text(panel, "Seu resultado", "title");
+            Text(panel, "Você acertou " + score + " de " + total + " perguntas.", "body");
+            Text(panel, score == total ? "Você acertou todas. Escolha outro desafio para continuar." : "Você pode repetir para praticar as perguntas que errou.", "muted body wrap");
             var recap = Box(panel, "result-recap");
             Text(recap, quiz.title, "guide-title");
             Text(recap, string.IsNullOrEmpty(ProgressStore.Instance.LastSaveError) ? "Suas estrelas ficam guardadas neste dispositivo." : ProgressStore.Instance.LastSaveError, "hint");
-            Btn(panel, "Continuar explorando  →", CloseModal, "primary");
+            Btn(panel, "Voltar à ilha", CloseModal, "primary");
             var replay = quiz;
-            Btn(panel, "Jogar este desafio de novo", () => BeginQuiz(replay), "quiet");
+            Btn(panel, "Repetir desafio", () => BeginQuiz(replay), "quiet");
             PlayTone(true);
         }
 
@@ -523,20 +522,23 @@ namespace Aprender
         {
             if (busy) return;
             var panel = OpenModal("help-panel");
-            Text(panel, "UM GUIA PARA SUA AVENTURA", "eyebrow");
-            Text(panel, "É fácil explorar!", "title");
-            Text(panel, "1   Caminhe com W A S D, as setas ou os botões na tela.\n\n2   Chegue perto de um portal e aperte E para entrar.\n\n3   Em cada ilha, o livro abre os desafios.\n\n4   Escolha uma resposta e toque em Conferir.\n\n5   Seus amigos aparecem quando estão na mesma ilha.", "body wrap help-copy");
-            Btn(panel, "Entendi. Vamos explorar!", CloseModal, "primary");
+            Text(panel, "Como jogar", "eyebrow");
+            Text(panel, "Controles", "title");
+            var controls = GameControls.Connected
+                ? "Analógico esquerdo: caminhar\n" + GameControls.ConfirmLabel + ": interagir / confirmar\n" + GameControls.CancelLabel + ": voltar\n" + GameControls.WaveLabel + ": acenar\n" + GameControls.MenuLabel + ": ajuda e pausa\n" + GameControls.HUDLabel + ": navegar pelos botões da tela\n\nNos campos de texto, confirme para abrir o teclado na tela."
+                : "WASD ou setas: caminhar\nE: entrar no portal ou abrir o livro\nEspaço: acenar\nEsc: ajuda / voltar\n\nVocê também pode usar os botões na tela.";
+            Text(panel, controls + "\n\nEm cada ilha, escolha um desafio e confira suas respostas. Os colegas da turma aparecem na mesma ilha.", "body wrap help-copy");
+            Btn(panel, "Voltar ao jogo", CloseModal, "primary");
         }
 
         void ShowLeave()
         {
             var panel = OpenModal("help-panel");
-            Text(panel, "ATÉ A PRÓXIMA DESCOBERTA", "eyebrow");
-            Text(panel, "Vamos fazer uma pausa?", "title");
+            Text(panel, "Pausa", "eyebrow");
+            Text(panel, "Sair do jogo?", "title");
             Text(panel, string.IsNullOrEmpty(ProgressStore.Instance.LastSaveError) ? "Suas estrelas já estão guardadas aqui." : ProgressStore.Instance.LastSaveError, "body muted");
             Btn(panel, "Continuar na ilha", CloseModal, "primary");
-            Btn(panel, "Sair da aventura", Leave, "quiet");
+            Btn(panel, "Voltar à entrada", Leave, "quiet");
         }
 
         void ShowConnectionLost(string message)
@@ -544,8 +546,8 @@ namespace Aprender
             busy = false;
             if (root == null) return;
             var panel = OpenModal("help-panel");
-            Text(panel, "A CONEXÃO FEZ UMA PAUSA", "eyebrow");
-            Text(panel, "Vamos encontrar a turma de novo?", "title");
+            Text(panel, "Conexão interrompida", "eyebrow");
+            Text(panel, "Não foi possível continuar na turma", "title");
             Text(panel, message, "body wrap muted");
             Btn(panel, "Voltar à entrada", Leave, "primary");
         }
@@ -570,7 +572,7 @@ namespace Aprender
             muted = !muted;
             PlayerPrefs.SetInt("aprender.muted", muted ? 1 : 0);
             PlayerPrefs.Save();
-            soundButton.text = muted ? "Som: desligado" : "Som: ligado";
+            soundButton.text = muted ? "Som: não" : "Som: sim";
         }
 
         void PlayTone(bool correct)
@@ -597,8 +599,8 @@ namespace Aprender
         static void Brand(VisualElement parent)
         {
             var brand = Box(parent, "brand row");
-            Text(brand, "i", "brand-icon");
-            Text(brand, "ilha do saber", "brand-name");
+            Text(brand, "IS", "brand-icon");
+            Text(brand, "Ilha do Saber", "brand-name");
         }
 
         static Image PetImage(VisualElement parent, string id, string classes)
@@ -633,12 +635,13 @@ namespace Aprender
             return button;
         }
 
-        static string RoomTitle(string room) => room == "hub" ? "Praça das descobertas" : "Ilha de " + (room == "matematica" ? "Matemática" : room == "portugues" ? "Português" : "Ciências");
+        static string RoomTitle(string room) => room == "hub" ? "Praça" : "Ilha de " + (room == "matematica" ? "Matemática" : room == "portugues" ? "Português" : "Ciências");
         static string SubjectSymbol(string id) => id == "matematica" ? "+" : id == "portugues" ? "Aa" : "✿";
         static Color SubjectColor(string id) => id == "matematica" ? new Color(0.53f, 0.40f, 0.84f) : id == "portugues" ? new Color(0.90f, 0.55f, 0.31f) : new Color(0.26f, 0.64f, 0.51f);
 
         void OnDestroy()
         {
+            DisposeControllerUI();
             if (positiveTone != null) Destroy(positiveTone);
             if (gentleTone != null) Destroy(gentleTone);
         }

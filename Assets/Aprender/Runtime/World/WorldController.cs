@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
 namespace Aprender
@@ -59,15 +58,16 @@ namespace Aprender
         private bool initialized;
         private Font labelFont;
         private Material worldTextMaterial;
+        private Material signMaterial;
         private Vector3 cameraVelocity;
         private const float MoveSpeed = 4.1f;
         private const float ArenaRadius = 10.4f;
         private static readonly Vector3 CameraOffset = new Vector3(0, 13.8f, -15.8f);
-        private static readonly Color Ink = new Color32(47, 57, 84, 255);
-        private static readonly Color Lilac = new Color32(139, 117, 232, 255);
-        private static readonly Color MathColor = new Color32(136, 102, 214, 255);
-        private static readonly Color LanguageColor = new Color32(230, 140, 79, 255);
-        private static readonly Color ScienceColor = new Color32(66, 163, 130, 255);
+        private static readonly Color Ink = new Color32(38, 57, 47, 255);
+        private static readonly Color Lilac = new Color32(92, 116, 96, 255);
+        private static readonly Color MathColor = new Color32(99, 113, 169, 255);
+        private static readonly Color LanguageColor = new Color32(190, 120, 75, 255);
+        private static readonly Color ScienceColor = new Color32(72, 132, 105, 255);
 
         public void Initialize(string playerId, string playerName, string avatarId)
         {
@@ -183,6 +183,14 @@ namespace Aprender
             var textShader = Resources.Load<Shader>("WorldText");
             if (textShader == null) textShader = Shader.Find("GUI/Text Shader");
             worldTextMaterial = new Material(textShader) { name = "Aprender · legendas", color = Color.white };
+            var signShader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (signShader == null) signShader = Shader.Find("Unlit/Color");
+            if (signShader == null) signShader = Shader.Find("Universal Render Pipeline/Lit");
+            signMaterial = new Material(signShader)
+            {
+                name = "Aprender · placas de leitura",
+                color = new Color32(255, 249, 233, 255)
+            };
             RefreshFontTexture(labelFont);
             Font.textureRebuilt += RefreshFontTexture;
             actorsRoot = new GameObject("Jogadores").transform;
@@ -220,28 +228,14 @@ namespace Aprender
         private void Update()
         {
             if (!initialized) return;
-            foreach (var interaction in interactions)
-            {
-                if (interaction.ring == null) continue;
-                var pulse = 1f + Mathf.Sin(Time.time * 1.7f + interaction.position.x) * .025f;
-                interaction.ring.localScale = new Vector3(pulse, pulse, pulse);
-            }
-            if (localActor == null || !InputEnabled)
+            if (localActor == null || !InputEnabled || GameControls.UICaptured)
             {
                 nearestInteraction = null;
                 return;
             }
 
-            var keyboard = Keyboard.current;
-            var input = TouchMove;
-            if (keyboard != null)
-            {
-                input.x += (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed ? 1 : 0)
-                    - (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed ? 1 : 0);
-                input.y += (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed ? 1 : 0)
-                    - (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ? 1 : 0);
-                if (keyboard.spaceKey.wasPressedThisFrame) Wave();
-            }
+            var input = TouchMove + GameControls.Movement;
+            if (GameControls.WavePressed) Wave();
             input = Vector2.ClampMagnitude(input, 1);
             if (input.sqrMagnitude > .005f)
             {
@@ -265,7 +259,7 @@ namespace Aprender
             if (nearestInteraction != null && Time.time >= interactionCooldown)
             {
                 if ((!nearestInteraction.quiz && nearestDistance < .95f)
-                    || (keyboard != null && keyboard.eKey.wasPressedThisFrame)) Interact();
+                    || GameControls.InteractPressed) Interact();
             }
         }
 
@@ -274,12 +268,13 @@ namespace Aprender
             if (!initialized || worldCamera == null) return;
             var follow = localActor == null ? Vector3.zero : localActor.position;
             // A little follow keeps the whole welcoming plaza readable while moving.
-            var target = new Vector3(follow.x * .25f, 0, 2f + follow.z * .2f);
+            var target = CameraTarget(follow);
             worldCamera.transform.position = Vector3.SmoothDamp(worldCamera.transform.position,
                 target + CameraOffset, ref cameraVelocity, .22f);
             worldCamera.transform.rotation = Quaternion.LookRotation(-CameraOffset);
-            // A portrait screen needs a larger field to preserve the three portals.
-            worldCamera.orthographicSize = Mathf.Max(8.2f, 10.5f / Mathf.Max(.65f, worldCamera.aspect));
+            // Keep a minimum horizontal field for the two outer portals. On a
+            // narrow window the camera moves out instead of cutting off a title.
+            worldCamera.orthographicSize = CameraSize();
         }
 
         private void SnapCamera()
@@ -287,8 +282,19 @@ namespace Aprender
             if (worldCamera == null) return;
             cameraVelocity = Vector3.zero;
             var follow = localActor == null ? Vector3.zero : localActor.position;
-            worldCamera.transform.position = new Vector3(follow.x * .25f, 0, 2f + follow.z * .2f) + CameraOffset;
+            worldCamera.transform.position = CameraTarget(follow) + CameraOffset;
             worldCamera.transform.rotation = Quaternion.LookRotation(-CameraOffset);
+            worldCamera.orthographicSize = CameraSize();
+        }
+
+        private float CameraSize() => Mathf.Max(8.2f, 10.8f / Mathf.Max(.65f, worldCamera.aspect));
+
+        private Vector3 CameraTarget(Vector3 follow)
+        {
+            // A wide phone has less vertical room below its navigation bar.
+            // Shift the plaza slightly down, leaving the three titles clear.
+            var wideScreenOffset = Mathf.InverseLerp(1.8f, 2.1f, worldCamera.aspect) * .5f;
+            return new Vector3(follow.x * .25f, 0, 2f + wideScreenOffset + follow.z * .2f);
         }
 
         private void BuildRoom()
@@ -306,21 +312,17 @@ namespace Aprender
 
             if (RoomId == "hub")
             {
-                Portal("matematica", "MATEMÁTICA", "1  2  3", new Vector3(-5.1f, 0, 3.8f), MathColor);
-                Portal("portugues", "PORTUGUÊS", "A  B  C", new Vector3(0, 0, 6.7f), LanguageColor);
-                Portal("ciencias", "CIÊNCIAS", "VIDA", new Vector3(5.1f, 0, 3.8f), ScienceColor);
-                Label("PRAÇA DAS DESCOBERTAS", new Vector3(0, .04f, -6.7f), .09f,
-                    new Color32(49, 101, 66, 255), roomRoot, false, Quaternion.Euler(90, 0, 0));
+                Portal("matematica", "Matemática", "1  2  3", new Vector3(-5.1f, 0, 3.8f), MathColor);
+                Portal("portugues", "Português", "A  B  C", new Vector3(0, 0, 6.7f), LanguageColor);
+                Portal("ciencias", "Ciências", "Água", new Vector3(5.1f, 0, 3.8f), ScienceColor);
                 Trail(new Vector3(-3.6f, 0, 0), new Vector3(-5.1f, 0, 2), MathColor);
                 Trail(new Vector3(0, 0, 1), new Vector3(0, 0, 4.8f), LanguageColor);
                 Trail(new Vector3(3.6f, 0, 0), new Vector3(5.1f, 0, 2), ScienceColor);
             }
             else
             {
-                Portal("hub", "VOLTAR À PRAÇA", "CASA", new Vector3(-5.1f, 0, -1.5f), Lilac);
+                Portal("hub", "Voltar à praça", "←", new Vector3(-5.1f, 0, -1.5f), Lilac);
                 QuizStation(color);
-                var title = RoomId == "matematica" ? "ILHA DOS NÚMEROS" : RoomId == "portugues" ? "ILHA DAS PALAVRAS" : "ILHA DAS DESCOBERTAS";
-                Label(title, new Vector3(0, .04f, -6.7f), .095f, color, roomRoot, false, Quaternion.Euler(90, 0, 0));
                 // Simple learning props make each subject identifiable without a finished scenario.
                 var symbols = RoomId == "matematica" ? new[] { "1", "+", "2", "=", "3" }
                     : RoomId == "portugues" ? new[] { "A", "E", "I", "O", "U" } : new[] { "SOL", "ÁGUA", "VIDA" };
@@ -387,12 +389,11 @@ namespace Aprender
             ringRoot.localPosition = position;
             var ring = Ring("Arco", ringRoot, new Vector3(0, 1.65f, 0), 1.2f, .14f, color, false);
             ring.transform.localScale = new Vector3(1, 1.22f, 1);
-            var inner = Primitive("Luz do portal", PrimitiveType.Cylinder, position + Vector3.up * 1.65f,
-                new Vector3(2.1f, .018f, 2.58f), Color.Lerp(color, Color.white, .78f));
+            var inner = Primitive("Fundo do portal", PrimitiveType.Cylinder, position + Vector3.up * 1.65f,
+                new Vector3(2.1f, .018f, 2.58f), Color.Lerp(color, new Color32(255, 249, 233, 255), .85f));
             inner.transform.localRotation = Quaternion.Euler(90, 0, 0);
-            Label(symbol, position + new Vector3(0, 1.9f, -.16f), .13f, color, roomRoot, false);
-            Label("ENTRAR", position + new Vector3(0, 1.20f, -.17f), .07f, color, roomRoot, false);
-            Label(title, position + new Vector3(0, 3.4f, 0), .085f, Ink, roomRoot, true);
+            Label(symbol, position + new Vector3(0, 1.65f, -.16f), .105f, color, roomRoot, true);
+            Sign(title, position + new Vector3(0, 3.5f, -.35f), color);
             Ring("Destino", roomRoot, position + new Vector3(0, .015f, -.1f), 1.55f, .035f, color, true);
             interactions.Add(new Interaction
             {
@@ -414,8 +415,7 @@ namespace Aprender
             var screen = Primitive("Livro de desafios", PrimitiveType.Cube, center + new Vector3(0, 1.23f, -.05f),
                 new Vector3(2.65f, .28f, 1.1f), Color.white);
             screen.transform.localRotation = Quaternion.Euler(-12, 0, 0);
-            Label("VAMOS APRENDER?", center + new Vector3(0, 2.65f, 0), .105f, Ink, roomRoot, true);
-            Label("QUIZZES", center + new Vector3(0, 1.7f, -.15f), .13f, color, roomRoot, true);
+            Sign("Atividades", center + new Vector3(0, 2.8f, -.35f), color);
             var ring = Ring("Hora de descobrir", roomRoot, center + new Vector3(0, .015f, -1.2f), 1.1f, .055f, color, true);
             interactions.Add(new Interaction { position = center + Vector3.back * 1.2f, label = "Escolher um quiz", quiz = true, ring = ring.transform });
         }
@@ -443,7 +443,7 @@ namespace Aprender
             if (local) Ring("Seu personagem", actor.transform, new Vector3(0, .039f, 0), .62f, .045f,
                 new Color32(244, 187, 65, 255), true);
             nameLabel = Label(SafeName(playerName) + (local ? " · você" : ""), new Vector3(0, 1.65f, 0), .064f,
-                local ? (Color)new Color32(92, 73, 173, 255) : Ink, actor.transform, true);
+                Ink, actor.transform, true);
             statusLabel = Label("", new Vector3(0, 2.0f, 0), .043f, Ink, actor.transform, true);
             var motion = actor.AddComponent<AvatarMotion>();
             motion.Setup(visual);
@@ -497,6 +497,36 @@ namespace Aprender
             renderer.receiveShadows = false;
             obj.GetComponent<WorldLabel>().FaceCamera = faceCamera;
             return label;
+        }
+
+        private void Sign(string title, Vector3 position, Color accent)
+        {
+            // A real backing keeps text readable against both foliage and sky.
+            // The entire sign faces the camera, so its text never intersects the
+            // portal arch and keeps the same visual weight on all three islands.
+            var sign = new GameObject("Placa · " + title, typeof(WorldLabel)).transform;
+            sign.SetParent(roomRoot, false);
+            sign.localPosition = position;
+            sign.rotation = Quaternion.LookRotation(-CameraOffset);
+            var facing = sign.GetComponent<WorldLabel>();
+            facing.FaceCamera = true;
+            facing.MinimumPixelHeight = 32f;
+            facing.ReferenceHeight = 1.02f;
+            facing.MaximumScale = 1.35f;
+
+            var edge = Primitive("Moldura", PrimitiveType.Cube, Vector3.zero,
+                new Vector3(4.65f, 1.02f, .06f), Ink, sign);
+            edge.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+            var backing = Primitive("Fundo creme", PrimitiveType.Cube, new Vector3(0, 0, -.035f),
+                new Vector3(4.57f, .94f, .035f), Color.white, sign);
+            var renderer = backing.GetComponent<Renderer>();
+            renderer.sharedMaterial = signMaterial;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            Primitive("Faixa da disciplina", PrimitiveType.Cube, new Vector3(-2.1f, 0, -.06f),
+                new Vector3(.075f, .62f, .02f), accent, sign);
+            var titleLabel = Label(title, new Vector3(.08f, .025f, -.075f), .103f, Ink, sign, false);
+            titleLabel.fontStyle = FontStyle.Normal;
         }
 
         private void RefreshFontTexture(Font rebuiltFont)
@@ -592,6 +622,7 @@ namespace Aprender
         {
             Font.textureRebuilt -= RefreshFontTexture;
             if (worldTextMaterial != null) Destroy(worldTextMaterial);
+            if (signMaterial != null) Destroy(signMaterial);
             foreach (var material in materials.Values) if (material != null) Destroy(material);
             foreach (var mesh in meshes) if (mesh != null) Destroy(mesh);
             if (ownsCamera && worldCamera != null) Destroy(worldCamera.gameObject);

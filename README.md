@@ -10,6 +10,10 @@ Jogo educativo 3D em português para crianças de aproximadamente 7 anos, em **U
 
 O projeto já aponta a cena do jogo como cena de build. Depois da preparação, Play inicia essa cena mesmo que outra esteja aberta. Para refazer a configuração, use **Ilha do Saber > Preparar projeto**. O código, as cenas, os prefabs, os tutoriais e os pacotes exclusivos do template multiplayer original foram removidos. O tema da interface foi mantido em `Assets/Aprender/Resources/UnityDefaultRuntimeTheme.tss`; as configurações ativas de renderização e entrada também foram preservadas.
 
+## Controles Xbox e Nintendo no macOS
+
+A branch `macOs` inclui caminhada, interação e navegação da interface por gamepad, com teclado na tela para inserir nome, código da turma e servidor. Consulte [os controles](docs/CONTROLES.md). Os títulos dos portais usam placas de alto contraste; a interface prioriza ações diretas e mantém a praça livre de painéis grandes.
+
 ## Jogar com a turma
 
 Requer Node.js **20 ou superior** em um computador da escola. Não há dependências npm para instalar.
