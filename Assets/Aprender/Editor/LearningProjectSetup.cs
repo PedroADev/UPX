@@ -88,7 +88,7 @@ namespace Aprender.Editor
             panel.referenceResolution = new Vector2Int(1280, 800);
             panel.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
             panel.match = 0.5f;
-            panel.themeStyleSheet = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>("Assets/UIToolkit/UnityThemes/UnityDefaultRuntimeTheme.tss");
+            panel.themeStyleSheet = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>("Assets/Aprender/Resources/UnityDefaultRuntimeTheme.tss");
             EditorUtility.SetDirty(panel);
             IncludeRuntimeShaders();
             AvatarAssetBuilder.EnsureAssets();

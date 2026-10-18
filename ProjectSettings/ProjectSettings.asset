@@ -254,8 +254,8 @@ PlayerSettings:
   appleEnableProMotion: 0
   shaderPrecisionModel: 0
   clonedFromGUID: a03d583fb7cd2d846806fc6d150b4fb9
-  templatePackageId: com.unity.template.multiplayer-ngo@2.1.1
-  templateDefaultScene: Assets/Scenes/MetagameScene.unity
+  templatePackageId:
+  templateDefaultScene: Assets/Aprender/Scenes/IlhaDoSaber.unity
   useCustomMainManifest: 0
   useCustomLauncherManifest: 0
   useCustomMainGradleTemplate: 0
