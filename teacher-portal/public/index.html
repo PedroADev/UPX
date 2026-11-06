@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#4338ca"><title>Farol da Turma</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app" aria-live="polite"></main>
+  <template id="login-template">
+    <section class="login-shell">
+      <div class="constellation one"></div><div class="constellation two"></div>
+      <article class="welcome-card">
+        <a class="brand brand-light" href="#"><span class="brand-mark">F</span><span>Farol <small>da turma</small></span></a>
+        <p class="eyebrow">PLANEJE UMA BOA AVENTURA</p>
+        <h1>Todo quiz pode abrir uma ilha nova.</h1>
+        <p class="welcome-copy">Crie desafios gentis, publique para a turma e acompanhe o que cada criança já descobriu.</p>
+        <div class="steps"><span><b>1</b> Crie</span><i></i><span><b>2</b> Publique</span><i></i><span><b>3</b> Jogue</span></div>
+        <p class="demo-note">Demonstração: <code>beatriz@ilhasaber.local</code><br>senha: <code>IlhaDoSaber!2026</code></p>
+      </article>
+      <article class="auth-card">
+        <div class="auth-heading"><span class="tiny-sun">✦</span><h2>Boas-vindas</h2><p>Entre para preparar a próxima aventura.</p></div>
+        <form id="login-form" class="form-stack">
+          <label>E-mail<input name="email" type="email" autocomplete="email" placeholder="voce@escola.com" required></label>
+          <label>Senha<input name="password" type="password" autocomplete="current-password" placeholder="Sua senha" required></label>
+          <button class="button primary" type="submit">Entrar no Farol <span>→</span></button>
+        </form>
+        <p class="auth-switch">Ainda não tem uma conta? <button class="link-button" data-action="show-register">Criar conta</button></p>
+        <div id="auth-message" class="form-message" role="alert"></div>
+      </article>
+    </section>
+  </template>
+  <template id="register-template">
+    <section class="login-shell">
+      <div class="constellation one"></div><div class="constellation two"></div>
+      <article class="welcome-card"><a class="brand brand-light" href="#"><span class="brand-mark">F</span><span>Farol <small>da turma</small></span></a><p class="eyebrow">COMECE POR AQUI</p><h1>Uma turma, muitas descobertas.</h1><p class="welcome-copy">Sua conta organiza os quizzes e as sessões que você cria.</p></article>
+      <article class="auth-card"><div class="auth-heading"><span class="tiny-sun">✦</span><h2>Criar conta</h2><p>Você poderá convidar a turma depois.</p></div>
+        <form id="register-form" class="form-stack"><label>Seu nome<input name="name" placeholder="Como a turma chama você?" required></label><label>E-mail<input name="email" type="email" required></label><label>Senha<input name="password" type="password" minlength="8" placeholder="Pelo menos 8 caracteres" required></label><button class="button primary" type="submit">Criar meu Farol <span>→</span></button></form>
+        <p class="auth-switch">Já tem uma conta? <button class="link-button" data-action="show-login">Entrar</button></p><div id="auth-message" class="form-message" role="alert"></div>
+      </article>
+    </section>
+  </template>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

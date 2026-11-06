@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { catalog as seed, publicCatalog, validateCatalog } from './catalog.mjs';
+import { createTeacherApi } from './teacher-api.mjs';
 
 class ApiError extends Error {
   constructor(status, code, message) { super(message); this.status = status; this.code = code; }
@@ -46,7 +47,8 @@ function readJson(req, limit) {
 export async function createGameServer(options = {}) {
   const source = options.catalog || seed;
   validateCatalog(source);
-  const visibleCatalog = publicCatalog(source);
+  const database = options.database || null;
+  const teacherApi = database ? createTeacherApi(database) : null;
   const now = options.now || Date.now;
   const dataFile = options.dataFile === undefined ? new URL('./data/attempts.json', import.meta.url) : options.dataFile;
   const presenceTtlMs = options.presenceTtlMs ?? 15_000;
@@ -64,15 +66,21 @@ export async function createGameServer(options = {}) {
   const tokens = new Map();
   const limits = new Map();
   const locks = new Map();
-  const quizzes = new Map();
-  const rooms = new Set(['hub', 'lobby']);
   let completedAttempts = [];
   let saveQueue = Promise.resolve();
 
-  for (const subject of source.subjects) {
-    rooms.add(subject.id);
-    for (const quiz of subject.quizzes) quizzes.set(quiz.id, { ...quiz, subjectId: subject.id });
+  function catalogFor(classId = null) {
+    const catalog = database ? database.catalog(classId) : source;
+    validateCatalog(catalog);
+    const quizzes = new Map();
+    const rooms = new Set(['hub', 'lobby']);
+    for (const subject of catalog.subjects) {
+      rooms.add(subject.id);
+      for (const quiz of subject.quizzes) quizzes.set(quiz.id, { ...quiz, subjectId: subject.id });
+    }
+    return { catalog, visible: publicCatalog(catalog), quizzes, rooms };
   }
+  const defaultCatalog = () => catalogFor(null);
 
   if (dataFile) {
     try {
@@ -84,6 +92,10 @@ export async function createGameServer(options = {}) {
 
   function persist(record) {
     const operation = saveQueue.then(async () => {
+      if (database) {
+        database.saveAttempt(record);
+        return;
+      }
       const next = completedAttempts.filter(item => item.completedAt > now() - retentionMs);
       next.push(record);
       if (dataFile) {
@@ -137,7 +149,16 @@ export async function createGameServer(options = {}) {
   function sessionFor(rawCode) {
     const code = rawCode.toUpperCase();
     if (!CODE_PATTERN.test(code)) fail(400, 'invalid_code', 'O código deve ter de 4 a 8 letras ou números.');
-    const session = sessions.get(code);
+    let session = sessions.get(code);
+    // Sessões criadas no portal sobrevivem a reinícios do processo; a presença
+    // continua efêmera para não guardar localização de crianças sem necessidade.
+    if (!session && database) {
+      const stored = database.session(code);
+      if (stored) {
+        session = { code, classId: stored.classId, lastTouched: now(), players: new Map(), attempts: new Map() };
+        sessions.set(code, session);
+      }
+    }
     if (!session) fail(404, 'session_not_found', 'Não encontramos essa sessão. Confira o código com seu professor.');
     return session;
   }
@@ -197,9 +218,13 @@ export async function createGameServer(options = {}) {
       if (bearer && tokens.has(bearer[1])) throttle(`token:${bearer[1]}`, authorizedLimit);
       else throttle(`ip:${ip}`, publicLimit);
       if (req.method === 'GET' && path === '/health') {
-        reply(200, { status: 'ok', service: 'aprender-juntos', version: 1 }); return;
+        reply(200, { status: 'ok', service: 'aprender-juntos', version: 2, database: database ? 'sqlite' : 'memory' }); return;
       }
-      if (req.method === 'GET' && path === '/api/catalog') { reply(200, visibleCatalog); return; }
+      if (teacherApi && path.startsWith('/api/teacher/')) {
+        const result = await teacherApi.handle({ req, method: req.method, path, readJson: request => readJson(request, bodyLimit) });
+        if (result) { reply(result.status, result.body); return; }
+      }
+      if (req.method === 'GET' && path === '/api/catalog') { reply(200, defaultCatalog().visible); return; }
       if (req.method === 'POST' && path === '/api/sessions') {
         throttle(`create:${ip}`, 20);
         const body = await readJson(req, bodyLimit);
@@ -210,12 +235,12 @@ export async function createGameServer(options = {}) {
           if (typeof code !== 'string') fail(400, 'invalid_code', 'Informe um código válido.');
           code = code.trim().toUpperCase();
           if (!CODE_PATTERN.test(code)) fail(400, 'invalid_code', 'O código deve ter de 4 a 8 letras ou números.');
-          if (sessions.has(code)) fail(409, 'code_in_use', 'Esse código já está em uso. Escolha outro.');
+          if (sessions.has(code) || database?.session(code)) fail(409, 'code_in_use', 'Esse código já está em uso. Escolha outro.');
         }
-        sessions.set(code, { code, lastTouched: now(), players: new Map(), attempts: new Map() });
+        sessions.set(code, { code, classId: null, lastTouched: now(), players: new Map(), attempts: new Map() });
         reply(201, { code }); return;
       }
-      const route = /^\/api\/sessions\/([A-Za-z0-9]+)\/(join|state|presence|attempts|players\/me)(?:\/([A-Za-z0-9-]+)\/answers)?$/.exec(path);
+      const route = /^\/api\/sessions\/([A-Za-z0-9]+)\/(join|state|catalog|presence|attempts|players\/me)(?:\/([A-Za-z0-9-]+)\/answers)?$/.exec(path);
       if (!route) fail(404, 'not_found', 'Esse caminho não existe.');
       const [, rawCode, action, attemptId] = route;
       const session = sessionFor(rawCode);
@@ -235,15 +260,17 @@ export async function createGameServer(options = {}) {
         reply(201, { token, playerId: id, code: session.code }); return;
       }
       const player = authenticate(req, session);
+      const sessionCatalog = catalogFor(session.classId || null);
       if (req.method === 'GET' && action === 'state' && !attemptId) {
         reply(200, { code: session.code, selfId: player.id, serverTime: now(), players: [...session.players.values()].filter(item => now() - item.lastSeen <= presenceTtlMs).map(publicPlayer) }); return;
       }
+      if (req.method === 'GET' && action === 'catalog' && !attemptId) { reply(200, sessionCatalog.visible); return; }
       if (req.method === 'PUT' && action === 'presence' && !attemptId) {
         const body = await readJson(req, bodyLimit);
-        if (typeof body.roomId !== 'string' || !rooms.has(body.roomId)) fail(400, 'invalid_room', 'Escolha uma sala disponível.');
+        if (typeof body.roomId !== 'string' || !sessionCatalog.rooms.has(body.roomId)) fail(400, 'invalid_room', 'Escolha uma sala disponível.');
         for (const axis of ['x', 'z', 'yaw']) if (typeof body[axis] !== 'number' || !Number.isFinite(body[axis]) || Math.abs(body[axis]) > (axis === 'yaw' ? 100_000 : 1000)) fail(400, 'invalid_position', 'A posição do personagem não é válida.');
         const quizId = body.quizId ?? '';
-        if (typeof quizId !== 'string' || (quizId && quizzes.get(quizId)?.subjectId !== body.roomId)) fail(400, 'invalid_quiz', 'Esse quiz não pertence a essa sala.');
+        if (typeof quizId !== 'string' || (quizId && sessionCatalog.quizzes.get(quizId)?.subjectId !== body.roomId)) fail(400, 'invalid_quiz', 'Esse quiz não pertence a essa sala.');
         Object.assign(player, { roomId: body.roomId, x: body.x, z: body.z, yaw: ((body.yaw % 360) + 360) % 360, quizId });
         reply(200, { ok: true }); return;
       }
@@ -254,7 +281,7 @@ export async function createGameServer(options = {}) {
       if (req.method === 'POST' && action === 'attempts' && !attemptId) {
         throttle(`attempt:${player.id}`, 30);
         const body = await readJson(req, bodyLimit);
-        const quiz = quizzes.get(body.quizId);
+        const quiz = sessionCatalog.quizzes.get(body.quizId);
         if (!quiz) fail(400, 'invalid_quiz', 'Escolha um quiz disponível.');
         // Começar novamente abandona a tentativa incompleta. A pontuação nunca
         // vem do cliente; tentativas concluídas continuam disponíveis para replay.
@@ -269,7 +296,8 @@ export async function createGameServer(options = {}) {
         await exclusive(attemptId, async () => {
           const attempt = session.attempts.get(attemptId);
           if (!attempt || attempt.playerId !== player.id) fail(404, 'attempt_not_found', 'Essa tentativa não foi encontrada. Comece o quiz novamente.');
-          const quiz = quizzes.get(attempt.quizId);
+          const quiz = sessionCatalog.quizzes.get(attempt.quizId);
+          if (!quiz) fail(400, 'quiz_unavailable', 'Esse quiz não está disponível nesta sessão.');
           const index = quiz.questions.findIndex(question => question.id === body.questionId);
           if (index < 0) fail(400, 'invalid_question', 'Essa pergunta não pertence ao quiz.');
           const question = quiz.questions[index];
@@ -302,7 +330,7 @@ export async function createGameServer(options = {}) {
       fail(405, 'method_not_allowed', 'Esta ação não está disponível neste caminho.');
     } catch (error) {
       if (res.headersSent || res.destroyed) return;
-      if (error instanceof ApiError) {
+      if (error instanceof ApiError || (Number.isInteger(error?.status) && error?.code)) {
         if (error.status === 429) res.setHeader('Retry-After', '60');
         reply(error.status, { error: { code: error.code, message: error.message } });
       } else {

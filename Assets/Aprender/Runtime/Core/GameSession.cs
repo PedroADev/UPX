@@ -142,6 +142,12 @@ namespace Aprender
                 SessionCode = string.IsNullOrEmpty(joined.code) ? cleanCode : joined.code;
                 IsOnline = true;
                 IsJoined = true;
+                // Uma sessão aberta pelo portal pode ter quizzes exclusivos da
+                // turma. O catálogo público continua sendo o plano B caso o
+                // servidor seja uma versão anterior que não ofereça esta rota.
+                yield return Request("GET", "/api/sessions/" + Uri.EscapeDataString(SessionCode) + "/catalog", null, true, result => response = result);
+                if (response.success && TryParse(response.json, out Catalog sessionCatalog) && IsValidCatalog(sessionCatalog))
+                    Catalog = sessionCatalog;
                 ResetPresence();
                 ResetAttempt();
                 Players.Clear();
