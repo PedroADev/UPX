@@ -65,7 +65,7 @@ export class AprenderDatabase {
       CREATE TABLE IF NOT EXISTS attempts (
         id TEXT PRIMARY KEY, session_code TEXT NOT NULL, player_id TEXT NOT NULL, player_name TEXT NOT NULL,
         avatar_id TEXT NOT NULL, quiz_id TEXT NOT NULL REFERENCES quizzes(id), started_at INTEGER NOT NULL,
-        completed_at INTEGER NOT NULL, score INTEGER NOT NULL, total INTEGER NOT NULL
+        completed_at INTEGER NOT NULL, score INTEGER NOT NULL, total INTEGER NOT NULL, stars INTEGER NOT NULL DEFAULT 0
       ) STRICT;
       CREATE TABLE IF NOT EXISTS attempt_answers (
         attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE, question_id TEXT NOT NULL,
