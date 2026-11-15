@@ -4,7 +4,7 @@ Versão **1.1.0 — demonstração local**.
 
 Ilha do Saber é um jogo educativo 3D para crianças de aproximadamente 7 anos. A criança escolhe um personagem, explora portais e responde quizzes. Professoras e professores usam o portal **Farol da Turma** para criar quizzes, organizar turmas e abrir sessões para o jogo.
 
-Esta versão é feita para uma aula ou demonstração em rede local. Não é uma publicação na internet: não há HTTPS, hospedagem cloud ou Docker nesta etapa.
+Esta versão foi feita para uma aula ou demonstração em rede local. Não é uma publicação na internet: não há HTTPS, hospedagem cloud ou Docker nesta etapa.
 
 ## O que existe no projeto
 
@@ -72,6 +72,8 @@ Código: o código criado no portal
 
 O jogo busca o catálogo da sessão depois que a criança entra. Assim, quizzes exclusivos da turma aparecem somente para aquela sessão.
 
+O modo **Jogar sozinho** funciona sem Node, portal ou rede. Ele usa o catálogo de demonstração em `Assets/Aprender/Resources/quiz-catalog.json` e salva o perfil/progresso no dispositivo.
+
 ## Usar com outros computadores da mesma rede
 
 O computador que executa o backend é o servidor da aula. Descubra o IPv4 dele com:
@@ -92,21 +94,19 @@ O portal do professor é local por padrão e abre apenas no computador servidor.
 
 ## Banco e dados
 
-Na primeira inicialização, o backend cria o arquivo:
-
-```text
-backend/data/ilha-do-saber.sqlite
-```
-
-Ele é ignorado pelo Git para que dados de uma turma não sejam enviados ao repositório. Guarde uma cópia desse arquivo antes de trocar de computador ou reinstalar o projeto.
+Na primeira inicialização, o backend cria o arquivo `backend/data/ilha-do-saber.sqlite`. Ele é ignorado pelo Git para que dados de uma turma não sejam enviados ao repositório. Guarde uma cópia desse arquivo antes de trocar de computador ou reinstalar o projeto.
 
 O SQLite preserva quizzes, turmas, sessões criadas pelo portal e tentativas concluídas. Presenças dos jogadores e tokens de login ficam apenas na memória e expiram ao reiniciar o servidor; isso é intencional para a demonstração local.
 
 O catálogo público enviado ao jogo não contém o gabarito. A resposta correta e a explicação só chegam depois de a criança enviar uma alternativa, quando o backend corrige a questão.
 
-## Prática individual
+## Plataformas
 
-O modo **Quero praticar sozinho** funciona sem Node, portal ou rede. Ele usa o catálogo de demonstração em `Assets/Aprender/Resources/quiz-catalog.json` e salva o perfil/progresso no dispositivo.
+No desktop, teclado, mouse e controles compatíveis funcionam no macOS e no Windows. Veja [os controles](docs/CONTROLES.md).
+
+Para iPhone, use um Mac com Xcode e o módulo **iOS Build Support** da Unity 6000.0.83f1. No Editor, use **Ilha do Saber > iOS > Preparar iPhone** e depois **Exportar projeto Xcode**. O guia completo está em [docs/IOS.md](docs/IOS.md). A exportação para iPhone ainda precisa ser testada em um Mac e aparelho reais.
+
+Para gerar um executável Windows, instale **Windows Build Support** no Unity Hub e use **Ilha do Saber > Gerar executável Windows**.
 
 ## Verificações
 
@@ -133,8 +133,6 @@ Esses testes não substituem abrir o projeto no Unity e testar uma aula real. An
 | `docs/api.md` | Contrato HTTP entre portal, backend e jogo |
 | `docs/database.sql` | Referência para uma futura migração a PostgreSQL; não é o banco em uso |
 | `docs/CHANGELOG.md` | Histórico de versões do projeto |
-
-Para gerar um executável Windows, instale **Windows Build Support** no Unity Hub e use **Ilha do Saber > Gerar executável Windows**. Para iPhone, é necessário um Mac, Xcode e o módulo iOS Build Support da mesma versão da Unity.
 
 ## Cenário e créditos
 
