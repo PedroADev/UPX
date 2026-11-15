@@ -4,8 +4,9 @@ import { once } from 'node:events';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { createGameServer } from '../app.mjs';
-import { openDatabase } from '../database.mjs';
+import { openDatabase, starsFor } from '../database.mjs';
 import { catalog } from '../catalog.mjs';
 
 test('professora publica um quiz e uma sessão de turma o entrega ao jogo', async t => {
@@ -44,4 +45,41 @@ test('professora publica um quiz e uma sessão de turma o entrega ao jogo', asyn
   assert.equal(answer.body.completed, true); assert.equal(answer.body.score, 100);
   const results = await request('/api/teacher/results', { token: teacherToken });
   assert.equal(results.body.results[0].playerName, 'Lia'); assert.equal(results.body.results[0].quizTitle, 'Missão dos pares');
+  assert.equal(results.body.results[0].stars, 3);
+});
+
+test('estrelas são calculadas pelo servidor e bancos anteriores recebem a coluna sem perder tentativas', async t => {
+  assert.equal(starsFor(0, 4), 1);
+  assert.equal(starsFor(200, 4), 1);
+  assert.equal(starsFor(300, 4), 2);
+  assert.equal(starsFor(400, 4), 3);
+  assert.equal(starsFor(100, 0), 0);
+
+  const folder = await mkdtemp(join(tmpdir(), 'farol-legacy-db-'));
+  const file = join(folder, 'ilha.sqlite');
+  let migrated;
+  t.after(async () => {
+    migrated?.close();
+    await rm(folder, { recursive: true, force: true });
+  });
+  const legacy = new DatabaseSync(file);
+  legacy.exec(`
+    CREATE TABLE subjects (
+      id TEXT PRIMARY KEY, title TEXT NOT NULL, subtitle TEXT NOT NULL DEFAULT '',
+      color TEXT NOT NULL DEFAULT '#4F46E5', icon TEXT NOT NULL DEFAULT 'book', created_at INTEGER NOT NULL
+    ) STRICT;
+    INSERT INTO subjects VALUES ('matematica', 'Matemática', '', '#4F46E5', 'book', 1);
+    CREATE TABLE attempts (
+      id TEXT PRIMARY KEY, session_code TEXT NOT NULL, player_id TEXT NOT NULL, player_name TEXT NOT NULL,
+      avatar_id TEXT NOT NULL, quiz_id TEXT NOT NULL, started_at INTEGER NOT NULL,
+      completed_at INTEGER NOT NULL, score INTEGER NOT NULL, total INTEGER NOT NULL
+    ) STRICT;
+    INSERT INTO attempts VALUES ('legacy', 'TURMA7', 'player', 'Lia', 'cat', 'quiz', 1, 2, 300, 4);
+  `);
+  legacy.close();
+
+  migrated = openDatabase(file, catalog);
+  const columns = migrated.db.prepare('PRAGMA table_info(attempts)').all().map(column => column.name);
+  assert.ok(columns.includes('stars'));
+  assert.equal(migrated.db.prepare('SELECT stars FROM attempts WHERE id=?').get('legacy').stars, 2);
 });

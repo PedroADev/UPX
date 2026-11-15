@@ -1,5 +1,8 @@
--- Proposta PostgreSQL 15+ para o futuro portal dos professores.
--- Não é uma migração do protótipo Node: hoje ele usa memória + histórico JSON.
+-- Proposta PostgreSQL 15+ para uma futura implantação em servidor.
+-- Não é usada pela demonstração local atual: ela usa SQLite em
+-- backend/data/ilha-do-saber.sqlite, via backend/database.mjs.
+-- Este arquivo serve apenas como referência de evolução; não execute-o para
+-- iniciar o projeto local.
 -- Mantém os conceitos do desenho e acrescenta versões de quiz, matrícula,
 -- sessão, presença e resposta individual. Execute em um banco vazio.
 BEGIN;

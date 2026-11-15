@@ -6,6 +6,15 @@ import { dirname } from 'node:path';
 const now = () => Date.now();
 const id = prefix => `${prefix}-${randomUUID()}`;
 
+/** A regra de estrelas é calculada no servidor, nunca confiada ao cliente. */
+export function starsFor(score, total) {
+  if (!Number.isFinite(score) || !Number.isInteger(total) || total < 1) return 0;
+  if (score >= total * 100) return 3;
+  if (score >= total * 60) return 2;
+  // Toda tentativa concluída rende ao menos uma estrela, mesmo sem acertos.
+  return 1;
+}
+
 function cleanText(value, minimum, maximum, label) {
   const text = typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '';
   if (Array.from(text).length < minimum || Array.from(text).length > maximum) throw new Error(`${label} deve ter de ${minimum} a ${maximum} caracteres.`);
@@ -75,10 +84,26 @@ export class AprenderDatabase {
       CREATE INDEX IF NOT EXISTS idx_quizzes_catalog ON quizzes(status, subject_id, class_id);
       CREATE INDEX IF NOT EXISTS idx_attempts_quiz ON attempts(quiz_id, completed_at DESC);
     `);
+    this.migrateAttempts();
     this.seed(seedCatalog);
   }
 
   close() { this.db.close(); }
+
+  /** Mantém bancos criados por versões anteriores utilizáveis sem apagar dados. */
+  migrateAttempts() {
+    const columns = this.db.prepare('PRAGMA table_info(attempts)').all().map(column => column.name);
+    if (!columns.includes('stars')) this.db.exec('ALTER TABLE attempts ADD COLUMN stars INTEGER NOT NULL DEFAULT 0');
+    // Registros anteriores não possuíam a pontuação por estrelas. Como uma
+    // tentativa concluída sempre tem total positivo, zero representa apenas o
+    // valor padrão antigo e pode ser recalculado com segurança.
+    this.db.prepare(`UPDATE attempts SET stars = CASE
+      WHEN total < 1 THEN 0
+      WHEN score >= total * 100 THEN 3
+      WHEN score >= total * 60 THEN 2
+      ELSE 1
+    END WHERE stars = 0`).run();
+  }
 
   seed(catalog) {
     const hasSubjects = this.db.prepare('SELECT 1 FROM subjects LIMIT 1').get();
@@ -210,10 +235,11 @@ export class AprenderDatabase {
 
   session(code) { return this.db.prepare('SELECT code,class_id AS classId FROM game_sessions WHERE code=?').get(code) || null; }
   saveAttempt(record) {
+    const stars = starsFor(record.score, record.total);
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      this.db.prepare('INSERT INTO attempts (id,session_code,player_id,player_name,avatar_id,quiz_id,started_at,completed_at,score,total) VALUES (?,?,?,?,?,?,?,?,?,?)')
-        .run(record.id, record.code, record.playerId, record.name, record.avatarId, record.quizId, record.startedAt, record.completedAt, record.score, record.total);
+      this.db.prepare('INSERT INTO attempts (id,session_code,player_id,player_name,avatar_id,quiz_id,started_at,completed_at,score,total,stars) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+        .run(record.id, record.code, record.playerId, record.name, record.avatarId, record.quizId, record.startedAt, record.completedAt, record.score, record.total, stars);
       const statement = this.db.prepare('INSERT INTO attempt_answers (attempt_id,question_id,option_id,correct,answered_at) VALUES (?,?,?,?,?)');
       record.answers.forEach(answer => statement.run(record.id, answer.questionId, answer.optionId, answer.correct ? 1 : 0, answer.answeredAt));
       this.db.exec('COMMIT');
@@ -224,7 +250,7 @@ export class AprenderDatabase {
     const scalar = sql => this.db.prepare(sql).get(teacherId).total;
     return { activeQuizzes: scalar("SELECT COUNT(*) AS total FROM quizzes WHERE teacher_id=? AND status='published'"), questions: scalar('SELECT COUNT(*) AS total FROM questions q JOIN quizzes z ON z.id=q.quiz_id WHERE z.teacher_id=?'), classes: scalar('SELECT COUNT(*) AS total FROM classes WHERE teacher_id=?'), sessions: scalar('SELECT COUNT(*) AS total FROM game_sessions WHERE teacher_id=?') };
   }
-  resultsFor(teacherId) { return this.db.prepare(`SELECT a.player_name AS playerName,a.score,a.total,a.completed_at AS completedAt,q.title AS quizTitle,c.name AS className
+  resultsFor(teacherId) { return this.db.prepare(`SELECT a.player_name AS playerName,a.score,a.total,a.stars AS stars,a.completed_at AS completedAt,q.title AS quizTitle,c.name AS className
     FROM attempts a JOIN quizzes q ON q.id=a.quiz_id LEFT JOIN classes c ON c.id=q.class_id WHERE q.teacher_id=? ORDER BY a.completed_at DESC LIMIT 20`).all(teacherId); }
 }
 

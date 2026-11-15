@@ -1,61 +1,70 @@
-# Servidor do Aprender Juntos
+# Backend do Ilha do Saber
 
-Servidor real para a demonstração em rede local. Usa somente módulos nativos do Node.js 20 ou superior; não há dependências para instalar.
+Servidor HTTP local usado pelo jogo e pelo portal Farol da Turma. Ele não usa Express, PostgreSQL ou pacotes npm externos: utiliza módulos nativos do **Node.js 22.13 ou superior** e SQLite nativo.
 
-Na raiz do projeto, execute no PowerShell:
+## Iniciar
+
+Na raiz do projeto:
 
 ```powershell
-Set-Location backend
+node backend\server.mjs
+```
+
+Ou, dentro desta pasta:
+
+```powershell
+npm start
+```
+
+Não use `npm ci`: não há dependências externas para instalar.
+
+O servidor escuta em `http://localhost:8787` e aceita conexões da rede local. O portal local em `http://localhost:8790` já está autorizado a conversar com esta API.
+
+Para conferir se ele iniciou:
+
+```powershell
+Invoke-RestMethod http://localhost:8787/health
+```
+
+A resposta deve incluir `"database":"sqlite"`.
+
+## Banco local
+
+Por padrão, o banco é criado em:
+
+```text
+backend/data/ilha-do-saber.sqlite
+```
+
+Use `DATABASE_FILE` somente se precisar guardar o arquivo em outro lugar:
+
+```powershell
+$env:DATABASE_FILE = 'D:\Aula\ilha-do-saber.sqlite'
 node server.mjs
 ```
 
-Mantenha esse terminal aberto. O jogo neste computador usa `http://localhost:8787`. Nos outros computadores, use `http://IP-DO-SERVIDOR:8787` no campo de servidor do jogo. Todos devem estar na mesma rede e entrar com o mesmo código de sessão. O professor pode criar a sessão pela interface do jogo; o portal web será desenvolvido depois.
+O arquivo contém dados de professoras, turmas, quizzes, sessões e tentativas concluídas. Ele é ignorado pelo Git. Faça uma cópia dele para backup; não o coloque em repositório público.
 
-Para descobrir o IPv4 do computador servidor:
+## Fluxo da aula
 
-```powershell
-ipconfig
-```
+1. Inicie este servidor.
+2. Em outro terminal, inicie `node teacher-portal\server.mjs`.
+3. No portal, crie turma, quiz e sessão.
+4. As crianças entram no jogo usando o código da sessão.
+5. O servidor corrige cada resposta e guarda o resultado no SQLite.
 
-Se o Windows pedir permissão de rede para o Node.js, permita a rede privada usada pela turma. Redes escolares podem bloquear conexões entre computadores; nesse caso, o responsável pela rede precisa liberar a porta TCP 8787. Teste `http://IP-DO-SERVIDOR:8787/health` no navegador de outro computador.
+O jogo nativo não envia cabeçalho CORS. O portal usa `localhost:8790`, autorizado explicitamente. Esta configuração é para demonstração local; não é uma implantação pública com HTTPS.
 
-Para verificar o servidor:
+## Rede local
 
-```powershell
-node --test test/api.test.mjs
-```
+Em outro computador, use o IPv4 do computador servidor, por exemplo `http://192.168.1.20:8787`. Não use `localhost` fora do servidor. Autorize o Node.js no firewall para redes privadas, se o Windows solicitar.
 
-Os testes abrem portas locais temporárias e verificam presença entre dois jogadores, isolamento entre sessões, expiração, validação, correção de respostas, ordem de perguntas, reenvio idempotente, concorrência e persistência. Nenhum serviço externo é necessário.
-
-## Configuração
-
-| Variável | Padrão | Uso |
-| --- | --- | --- |
-| `PORT` | `8787` | Porta HTTP. |
-| `HOST` | `0.0.0.0` | Interfaces de rede; `127.0.0.1` restringe ao próprio computador. |
-| `DATA_FILE` | `backend/data/attempts.json` | Caminho do histórico; prefira um caminho absoluto ao personalizar. |
-| `ALLOWED_ORIGINS` | vazio | Origens web autorizadas, separadas por vírgula, por exemplo `http://localhost:5173,https://escola.example`. |
-
-Exemplo opcional:
+## Testes
 
 ```powershell
-$env:PORT = '8787'
-$env:ALLOWED_ORIGINS = 'http://localhost:5173'
-node server.mjs
+node --test test/*.test.mjs
 ```
 
-Clientes Unity nativos não enviam `Origin` e funcionam sem configurar CORS. Uma futura versão WebGL precisa cadastrar a origem do site. Não é usado `Access-Control-Allow-Origin: *`.
+Os testes criam bancos temporários e não alteram o banco da aula.
 
-## Persistência e limites
-
-Sessões, nomes de presença, posições e tokens ficam em memória e desaparecem ao reiniciar o servidor. O código da sessão permite entrar; não é uma senha pessoal. O aluno escolhe um nome de exibição, sem e-mail ou senha.
-
-Cada quiz concluído é salvo atomicamente no arquivo de histórico, com as respostas e pontuação calculadas no servidor. Tokens nunca são gravados nesse arquivo ou retornados na lista de colegas. Registros de mais de 30 dias são descartados ao carregar o histórico e na próxima gravação; se o servidor permanecer desligado, o arquivo deve ser removido conforme a política de retenção da escola. Tentativas incompletas não são persistidas. O histórico atual serve de base para a futura integração; esta versão não tem painel de relatórios ou autenticação de professores.
-
-A lista mostra somente colegas com atividade nos últimos 15 segundos. Um token inativo por 30 minutos expira; uma sessão sem atividade por 4 horas é removida. O limite é de 40 participantes por sessão e 200 sessões por processo. Posições são informadas pelos clientes; a correção e a pontuação dos quizzes são autoritativas.
-
-Esta execução HTTP foi preparada para protótipo em rede local privada. A publicação na internet depende de HTTPS, autenticação de professores, controle de turmas e armazenamento gerenciado. O esquema proposto em [database.sql](../docs/database.sql) prevê esses vínculos; não é executado por este servidor.
-
-O catálogo de demonstração fica em `Assets/Aprender/Resources/quiz-catalog.json`: 3 disciplinas, 6 quizzes e 24 questões. O mesmo arquivo permite prática local na Unity. O servidor retira o gabarito de `GET /api/catalog`; o arquivo incluído no cliente continua contendo respostas para a prática offline, portanto uma distribuição com avaliação formal deve buscar os conteúdos online e não empacotar o gabarito.
-
-Contrato completo: [docs/api.md](../docs/api.md).
+Contrato completo: [../docs/api.md](../docs/api.md).

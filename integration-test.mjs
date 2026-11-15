@@ -1,179 +1,102 @@
-// integration-test.mjs – end‑to‑end test for UPX (Ilha do Saber)
-// Run with: node integration-test.mjs
-// Requires Node 20+ (fetch is built‑in).
+// Verificação ponta a ponta isolada: portal -> sessão -> catálogo do jogo -> tentativa -> resultado.
+// Execute na raiz com: node integration-test.mjs
+// O script cria um SQLite temporário e não altera o banco usado pela demonstração.
 
-import fs from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
+import assert from 'node:assert/strict';
+import { once } from 'node:events';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createGameServer } from './backend/app.mjs';
+import { openDatabase, starsFor } from './backend/database.mjs';
+import { catalog } from './backend/catalog.mjs';
 
-const LOG_PATH = fileURLToPath(new URL('./integration-test.log', import.meta.url));
-function log(message) {
-  const time = new Date().toISOString();
-  const line = `[${time}] ${message}\n`;
-  fs.appendFileSync(LOG_PATH, line);
-  console.log(message);
-}
+const demoCredentials = { email: 'beatriz@ilhasaber.local', password: 'IlhaDoSaber!2026' };
+
+function say(message) { console.log(`[integração] ${message}`); }
 
 async function main() {
-  const backend = 'http://127.0.0.1:8787';
+  const folder = await mkdtemp(join(tmpdir(), 'ilha-integration-'));
+  const database = openDatabase(join(folder, 'ilha.sqlite'), catalog);
+  const server = await createGameServer({ database, dataFile: null, log: () => {} });
+  let listening = false;
 
-  // 1️⃣ Login (demo teacher)
-  log('🔐 Logging in as demo teacher');
-  const loginResp = await fetch(`${backend}/api/teacher/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'beatriz@ilhasaber.local', password: 'IlhaDoSaber!2026' })
-  });
-  if (!loginResp.ok) throw new Error('Login failed');
-  const { token, teacher } = await loginResp.json();
-  const authHeader = { Authorization: `Bearer ${token}` };
-  log(`✅ Logged in as ${teacher.name}`);
+  try {
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    listening = true;
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const request = async (path, { method = 'GET', token, body } = {}) => {
+      const response = await fetch(base + path, {
+        method,
+        headers: { ...(body ? { 'content-type': 'application/json' } : {}), ...(token ? { authorization: `Bearer ${token}` } : {}) },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      const payload = await response.json();
+      assert.ok(response.ok, `${method} ${path}: ${payload?.error?.message || response.status}`);
+      return payload;
+    };
 
-  // 2️⃣ Create a class (turma)
-  log('🏫 Creating class');
-  const classResp = await fetch(`${backend}/api/teacher/classes`, {
-    method: 'POST',
-    headers: { ...authHeader, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: 'Turma Teste', description: 'Turma para integração' })
-  });
-  const { class: createdClass } = await classResp.json();
-  log(`✅ Created class id=${createdClass.id}`);
+    say('Entrando como professora de demonstração.');
+    const login = await request('/api/teacher/auth/login', { method: 'POST', body: demoCredentials });
+    const token = login.token;
+    const suffix = Date.now().toString(36);
 
-  // 3️⃣ Create a quiz with 4 questions
-  log('✏️ Creating quiz');
-  // fetch a subject id first
-  const subjectsResp = await fetch(`${backend}/api/teacher/subjects`, { headers: authHeader });
-  const { subjects } = await subjectsResp.json();
-  const subjectId = subjects[0].id;
-
-  const quizPayload = {
-    title: 'Quiz Integração',
-    description: 'Quiz de teste para integração',
-    subjectId,
-    classId: createdClass.id,
-    status: 'published',
-    questions: [
-      {
-        text: 'Pergunta 1',
-        explanation: 'Exp 1',
-        options: [
-          { text: 'A', isCorrect: true },
-          { text: 'B', isCorrect: false }
-        ]
-      },
-      {
-        text: 'Pergunta 2',
-        explanation: 'Exp 2',
-        options: [
-          { text: 'C', isCorrect: false },
-          { text: 'D', isCorrect: true }
-        ]
-      },
-      {
-        text: 'Pergunta 3',
-        explanation: 'Exp 3',
-        options: [
-          { text: 'E', isCorrect: true },
-          { text: 'F', isCorrect: false }
-        ]
-      },
-      {
-        text: 'Pergunta 4',
-        explanation: 'Exp 4',
-        options: [
-          { text: 'G', isCorrect: false },
-          { text: 'H', isCorrect: true }
+    say('Criando turma e quiz pelo contrato usado pelo portal.');
+    const turma = await request('/api/teacher/classes', { method: 'POST', token, body: { name: `Turma integração ${suffix}`, description: 'Criada apenas para o teste isolado.' } });
+    const subjects = await request('/api/teacher/subjects', { token });
+    const quizTitle = `Quiz integração ${suffix}`;
+    const created = await request('/api/teacher/quizzes', {
+      method: 'POST', token,
+      body: {
+        title: quizTitle, description: 'Verifica o caminho completo sem expor o gabarito.',
+        subjectId: subjects.subjects[0].id, classId: turma.class.id, status: 'published',
+        questions: [
+          { text: 'Qual cor aparece no céu em um dia claro?', explanation: 'O céu costuma parecer azul por causa da luz espalhada na atmosfera.', options: [{ text: 'Azul', isCorrect: true }, { text: 'Roxo', isCorrect: false }] },
+          { text: 'Quantas patas tem uma aranha?', explanation: 'Aranhas são aracnídeos e têm oito patas.', options: [{ text: 'Seis', isCorrect: false }, { text: 'Oito', isCorrect: true }] },
+          { text: 'Qual letra começa a palavra bola?', explanation: 'A palavra bola começa com B.', options: [{ text: 'B', isCorrect: true }, { text: 'D', isCorrect: false }] },
+          { text: 'Quanto é 2 mais 2?', explanation: 'Juntar dois grupos de dois resulta em quatro.', options: [{ text: 'Quatro', isCorrect: true }, { text: 'Cinco', isCorrect: false }] }
         ]
       }
-    ]
-  };
-  const quizResp = await fetch(`${backend}/api/teacher/quizzes`, {
-    method: 'POST',
-    headers: { ...authHeader, 'Content-Type': 'application/json' },
-    body: JSON.stringify(quizPayload)
-  });
-  const { quiz } = await quizResp.json();
-  log(`✅ Created quiz id=${quiz.id}`);
-
-  // 4️⃣ Create a session for the class
-  log('🎮 Creating session');
-  const sessionResp = await fetch(`${backend}/api/teacher/sessions`, {
-    method: 'POST',
-    headers: { ...authHeader, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ classId: createdClass.id })
-  });
-  const { session } = await sessionResp.json();
-  log(`✅ Session code=${session.code}`);
-
-  // 5️⃣ Simulate a Unity client: fetch public quiz and send attempt
-  log('🕹️ Simulating Unity client');
-  const publicCatalogResp = await fetch(`${backend}/api/public/catalog?classId=${createdClass.id}`);
-  const publicCatalog = await publicCatalogResp.json();
-  const publicQuiz = publicCatalog.subjects.flatMap(s => s.quizzes).find(q => q.id === quiz.id);
-  if (!publicQuiz) throw new Error('Quiz not found in public catalog');
-  log('✅ Retrieved public quiz');
-
-  // Build answers – 3 correct, 1 wrong => 75% => 2 stars
-  const answers = [];
-  for (let i = 0; i < publicQuiz.questions.length; i++) {
-    const q = publicQuiz.questions[i];
-    const correctOption = q.options.find(o => o.id === q.correctOptionId);
-    const wrongOption = q.options.find(o => o.id !== q.correctOptionId);
-    const optionId = i < 3 ? correctOption.id : wrongOption.id; // first three correct
-    answers.push({
-      questionId: q.id,
-      optionId,
-      correct: i < 3,
-      answeredAt: Date.now()
     });
+
+    say('Abrindo a sessão que será usada pelo jogo.');
+    const opened = await request('/api/teacher/sessions', { method: 'POST', token, body: { classId: turma.class.id } });
+    const joined = await request(`/api/sessions/${opened.session.code}/join`, { method: 'POST', body: { name: 'Lia Teste', avatarId: 'cat' } });
+
+    say('Buscando o catálogo da sessão como a Unity faz após entrar.');
+    const sessionCatalog = await request(`/api/sessions/${opened.session.code}/catalog`, { token: joined.token });
+    const publicQuiz = sessionCatalog.subjects.flatMap(subject => subject.quizzes).find(quiz => quiz.id === created.quiz.id);
+    assert.ok(publicQuiz, 'O quiz publicado não chegou ao catálogo da turma.');
+    assert.equal(JSON.stringify(publicQuiz).includes('correctOptionId'), false, 'O gabarito não pode sair no catálogo público.');
+    assert.equal(JSON.stringify(publicQuiz).includes('explanation'), false, 'A explicação só pode aparecer depois da resposta.');
+
+    say('Respondendo pelo mesmo fluxo usado pelo jogo.');
+    const attempt = await request(`/api/sessions/${opened.session.code}/attempts`, { method: 'POST', token: joined.token, body: { quizId: publicQuiz.id } });
+    let finalAnswer;
+    for (const question of publicQuiz.questions) {
+      finalAnswer = await request(`/api/sessions/${opened.session.code}/attempts/${attempt.id}/answers`, {
+        method: 'POST', token: joined.token, body: { questionId: question.id, optionId: question.options[0].id }
+      });
+    }
+    assert.equal(finalAnswer.completed, true);
+
+    say('Conferindo o resultado visto pela professora.');
+    const results = await request('/api/teacher/results', { token });
+    const result = results.results.find(item => item.playerName === 'Lia Teste' && item.quizTitle === quizTitle);
+    assert.ok(result, 'A tentativa concluída não apareceu para a professora.');
+    assert.equal(result.score, finalAnswer.score);
+    assert.equal(result.total, finalAnswer.total);
+    assert.equal(result.stars, starsFor(finalAnswer.score, finalAnswer.total));
+    say(`Fluxo concluído: ${result.score}/${result.total * 100} pontos e ${result.stars} estrela(s).`);
+  } finally {
+    if (listening) await new Promise(resolve => server.close(resolve));
+    database.close();
+    await rm(folder, { recursive: true, force: true });
   }
-
-  const attemptPayload = {
-    id: `attempt-${Date.now()}`,
-    code: session.code,
-    playerId: `player-${Date.now()}`,
-    name: 'Aluno Teste',
-    avatarId: 'avatar-1',
-    quizId: quiz.id,
-    startedAt: Date.now() - 5000,
-    completedAt: Date.now(),
-    score: answers.filter(a => a.correct).length,
-    total: answers.length,
-    answers
-  };
-
-  const attemptResp = await fetch(`${backend}/api/public/attempt`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(attemptPayload)
-  });
-  if (!attemptResp.ok) {
-    const txt = await attemptResp.text();
-    throw new Error(`Attempt upload failed: ${attemptResp.status} ${txt}`);
-  }
-  log('✅ Attempt uploaded');
-
-  // 6️⃣ Verify results via teacher endpoint
-  const resultsResp = await fetch(`${backend}/api/teacher/results`, { headers: authHeader });
-  const { results } = await resultsResp.json();
-  const myResult = results.find(r => r.playerName === 'Aluno Teste' && r.quizTitle === quiz.title);
-  if (!myResult) throw new Error('Result not found for test player');
-  log(`✅ Result found – score=${myResult.score}/${myResult.total}`);
-
-  const percent = myResult.score / myResult.total;
-  const expectedStars = percent === 1 ? 3 : percent >= 0.6 ? 2 : percent > 0 ? 1 : 0;
-  log(`💫 Expected stars=${expectedStars}`);
-
-  // Verify player_progress (new endpoint added for debugging)
-  const progResp = await fetch(`${backend}/api/teacher/progress?quizId=${quiz.id}`, { headers: authHeader });
-  if (progResp.ok) {
-    const { progress } = await progResp.json();
-    const pp = progress.find(p => p.playerId === attemptPayload.playerId);
-    if (pp) log(`✅ player_progress shows bestStars=${pp.bestStars}`);
-  }
-
-  log('🏁 Integration test completed');
 }
 
-main().catch(err => { log(`❌ Test failed: ${err.message}`); process.exit(1); });
-
+main().catch(error => {
+  console.error(`[integração] Falhou: ${error.message}`);
+  process.exitCode = 1;
+});
