@@ -20,6 +20,8 @@ namespace Aprender.Editor
         public const string ScenePath = "Assets/Aprender/Scenes/IlhaDoSaber.unity";
         const string ResourcesPath = "Assets/Aprender/Resources";
         const string PipelinePath = ResourcesPath + "/IlhaPipeline.asset";
+        const string RuntimeLitMaterialPath = ResourcesPath + "/RuntimeLit.mat";
+        const string RuntimeUnlitMaterialPath = ResourcesPath + "/RuntimeUnlit.mat";
         static Process ownedServer;
 
         static LearningProjectSetup()
@@ -37,7 +39,10 @@ namespace Aprender.Editor
                 EditorApplication.delayCall += PrepareIfMissing;
                 return;
             }
-            if (!File.Exists(PipelinePath)) PrepareProject();
+            if (!File.Exists(PipelinePath)
+                || AssetDatabase.LoadAssetAtPath<Material>(RuntimeLitMaterialPath) == null
+                || AssetDatabase.LoadAssetAtPath<Material>(RuntimeUnlitMaterialPath) == null)
+                PrepareProject();
             else EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
         }
 
@@ -90,7 +95,13 @@ namespace Aprender.Editor
             panel.match = 0.5f;
             panel.themeStyleSheet = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>("Assets/Aprender/Resources/UnityDefaultRuntimeTheme.tss");
             EditorUtility.SetDirty(panel);
-            IncludeRuntimeShaders();
+            // Runtime code clones these two material assets when it needs a
+            // different colour. Keeping the shader itself in Graphics Settings
+            // would force Unity to compile every URP/Lit combination (hundreds
+            // of thousands for this project) into each player build.
+            EnsureRuntimeMaterial(RuntimeLitMaterialPath, "Universal Render Pipeline/Lit", .12f);
+            EnsureRuntimeMaterial(RuntimeUnlitMaterialPath, "Universal Render Pipeline/Unlit", null);
+            RemoveForcedUrpShaders();
             AvatarAssetBuilder.EnsureAssets();
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath);
@@ -104,19 +115,39 @@ namespace Aprender.Editor
             Debug.Log("Ilha do Saber pronta. Abra a cena pelo menu e pressione Play. O modo prática funciona sem servidor.");
         }
 
-        static void IncludeRuntimeShaders()
+        static void EnsureRuntimeMaterial(string assetPath, string shaderName, float? smoothness)
+        {
+            var shader = Shader.Find(shaderName);
+            if (shader == null)
+                throw new BuildFailedException("Shader URP não encontrado: " + shaderName);
+
+            var material = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+            if (material == null)
+            {
+                material = new Material(shader) { name = Path.GetFileNameWithoutExtension(assetPath) };
+                AssetDatabase.CreateAsset(material, assetPath);
+            }
+            material.shader = shader;
+            material.color = Color.white;
+            if (smoothness.HasValue && material.HasProperty("_Smoothness"))
+                material.SetFloat("_Smoothness", smoothness.Value);
+            EditorUtility.SetDirty(material);
+        }
+
+        static void RemoveForcedUrpShaders()
         {
             var graphics = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset")[0]);
             var shaders = graphics.FindProperty("m_AlwaysIncludedShaders");
-            foreach (var name in new[] { "Universal Render Pipeline/Lit", "Universal Render Pipeline/Unlit", "Sprites/Default" })
+            var forcedShaders = new[]
             {
-                var shader = Shader.Find(name);
-                if (shader == null) continue;
-                var present = false;
-                for (var i = 0; i < shaders.arraySize; i++) present |= shaders.GetArrayElementAtIndex(i).objectReferenceValue == shader;
-                if (present) continue;
-                shaders.InsertArrayElementAtIndex(shaders.arraySize);
-                shaders.GetArrayElementAtIndex(shaders.arraySize - 1).objectReferenceValue = shader;
+                Shader.Find("Universal Render Pipeline/Lit"),
+                Shader.Find("Universal Render Pipeline/Unlit")
+            };
+            for (var i = shaders.arraySize - 1; i >= 0; i--)
+            {
+                var includedShader = shaders.GetArrayElementAtIndex(i).objectReferenceValue;
+                if (forcedShaders.Any(shader => shader != null && includedShader == shader))
+                    shaders.DeleteArrayElementAtIndex(i);
             }
             graphics.ApplyModifiedPropertiesWithoutUndo();
         }

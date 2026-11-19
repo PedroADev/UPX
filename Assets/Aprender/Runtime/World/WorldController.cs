@@ -60,6 +60,7 @@ namespace Aprender
         private Font labelFont;
         private Material worldTextMaterial;
         private Material signMaterial;
+        private Material runtimeLitTemplate;
         private Vector3 cameraVelocity;
         private const float MoveSpeed = 4.1f;
         private const float ArenaRadius = 10.4f;
@@ -184,10 +185,11 @@ namespace Aprender
             var textShader = Resources.Load<Shader>("WorldText");
             if (textShader == null) textShader = Shader.Find("GUI/Text Shader");
             worldTextMaterial = new Material(textShader) { name = "Aprender · legendas", color = Color.white };
-            var signShader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (signShader == null) signShader = Shader.Find("Unlit/Color");
-            if (signShader == null) signShader = Shader.Find("Universal Render Pipeline/Lit");
-            signMaterial = new Material(signShader)
+            runtimeLitTemplate = Resources.Load<Material>("RuntimeLit");
+            var runtimeUnlitTemplate = Resources.Load<Material>("RuntimeUnlit");
+            if (runtimeLitTemplate == null || runtimeUnlitTemplate == null)
+                throw new InvalidOperationException("Os materiais de execução não foram preparados. Use Ilha do Saber > Preparar projeto no Editor.");
+            signMaterial = new Material(runtimeUnlitTemplate)
             {
                 name = "Aprender · placas de leitura",
                 color = new Color32(255, 249, 233, 255)
@@ -588,9 +590,7 @@ namespace Aprender
         private Material MaterialFor(Color color)
         {
             if (materials.TryGetValue(color, out var material)) return material;
-            var shader = Shader.Find("Universal Render Pipeline/Lit");
-            if (shader == null) shader = Shader.Find("Standard");
-            material = new Material(shader) { name = "Aprender · cor", color = color };
+            material = new Material(runtimeLitTemplate) { name = "Aprender · cor", color = color };
             if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", .12f);
             materials.Add(color, material);
             return material;
